@@ -48,6 +48,7 @@ export default function Game() {
   const [nextMino, setNextMino] = useState<Array<Array<string>>>([]);
   const [board, setBoard] = useState<Array<Array<string>>>([]);
   const [score, setScore] = useState<number>(0);
+  const [gameOver, setGameOver] = useState<boolean>(false);
 
   const Dpad = () => {
     return (
@@ -99,7 +100,6 @@ export default function Game() {
     const boardData = localStorage.getItem("board");
     if (boardData) {
       const board = JSON.parse(boardData);
-      console.log(board.iColor);
       setBoardBGColor(board.boardBGColor);
       setIColor(board.iColor);
       setJColor(board.jColor);
@@ -111,14 +111,24 @@ export default function Game() {
     }
   };
 
-  useEffect(() => {
+  const startGame = () => {
+    
+  };
+
+  const preStart = async () => {
     setColors();
+    const nextMino = tetrominoes[Math.floor(Math.random() * 7)];
+    setNextMino(nextMino);
+    handleRandomTetromino(nextMino);
     setBoard(makeBoard());
-    setNextMino(
-      handleRandomTetromino(
-        tetrominoes[Math.floor(Math.random() * tetrominoes.length)]
-      )
-    );
+  };
+
+  useEffect(() => {
+    (async () => {
+      await preStart().then(() => {
+        startGame();
+      });
+    })();
   }, []);
 
   const Cell = ({ cell, j }: { cell: string; j: number }) => {
