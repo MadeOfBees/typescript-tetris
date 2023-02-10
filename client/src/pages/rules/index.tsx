@@ -12,20 +12,31 @@ export default function Rules() {
           <div className="flex justify-center">
             <ul>
               <li>
-                The goal of Tetris is to score as many points as possible by
-                clearing horizontal lines of Blocks.
+                Tetris is one of my favorite games of all time and while the
+                rules are simple i'm sure you'll have a lot of fun playing it.
               </li>
               <li>
-                The player can move each Block left or right, rotate it 90
-                degrees clockwise, and move it down one unit at a time.
+                The game starts with a random assortment of Tetrominoes (shape
+                pieces) falling from the top of the playing area.
               </li>
               <li>
-                When a horizontal line of Blocks is formed, that line disappears
-                and all Blocks above it move down one unit.
+                Use the left and right arrow keys to move the piece side to
+                side, the down arrow key to make the piece drop faster, and the
+                up arrow key to rotate the piece clockwise.
               </li>
               <li>
-                The game ends when the Blocks stack up to the top of the playing
-                area.
+                When a horizontal line is completely filled with blocks, it
+                disappears and any blocks above it will drop down to fill the
+                gap.
+              </li>
+              <li>
+                The game ends when the Tetrominoes stack up and reach the top of
+                the playing area.
+              </li>
+              <li>
+                The objective is to score as many points as possible by clearing
+                as many lines as possible, when the game is over your score will
+                be saved to the leaderboard.
               </li>
             </ul>
           </div>

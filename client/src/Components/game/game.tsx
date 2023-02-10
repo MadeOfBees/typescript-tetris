@@ -81,42 +81,15 @@ export default function Game() {
     return board;
   };
 
-  const handleRandomTetromino = (tetromino: Array<Array<string>>) => {
-    const board = [];
-    for (let i = 0; i < 4; i++) {
-      const row = [];
-      for (let j = 0; j < 4; j++) {
-        row.push("");
-      }
-      board.push(row);
-    }
-    if (tetromino === tetrominoes[1]) {
-      for (let i = 0; i < tetromino.length; i++) {
-        for (let j = 0; j < tetromino[i].length; j++) {
-          board[i][j + 1] = tetromino[i][j];
-        }
-      }
-    } else if (tetromino === tetrominoes[3]) {
-      for (let i = 0; i < tetromino.length; i++) {
-        for (let j = 0; j < tetromino[i].length; j++) {
-          board[i + 1][j + 1] = tetromino[i][j];
-        }
-      }
-    } else if (tetromino === tetrominoes[4] || tetromino === tetrominoes[6]) {
-      for (let i = 0; i < tetromino.length; i++) {
-        for (let j = 0; j < tetromino[i].length; j++) {
-          board[i + 1][j] = tetromino[i][j];
-        }
-      }
-    } else {
-      for (let i = 0; i < tetromino.length; i++) {
-        for (let j = 0; j < tetromino[i].length; j++) {
-          board[i][j] = tetromino[i][j];
-        }
-      }
-    }
+  const handleRandomTetromino = (tetromino: string[][]) => {
+    const board = Array(4).fill(null).map(() => Array(4).fill(''));
+    let x = 0, y = 0;
+    if (tetromino === tetrominoes[1]) y = 1;
+    else if (tetromino === tetrominoes[3]) x = y = 1;
+    else if (tetromino === tetrominoes[4] || tetromino === tetrominoes[6]) x = 1;
+    tetromino.forEach((r, i) => r.forEach((c, j) => board[i + x][j + y] = c));
     return board;
-  };
+  };  
 
   const setColors = () => {
     const boardData = localStorage.getItem("board");
@@ -136,12 +109,19 @@ export default function Game() {
   const startGame = () => {
     const interval = setInterval(() => {
       if (!gameOver) {
+        gameLoop();
       }
     }, 500);
     return () => clearInterval(interval);
   };
 
-  const newMino = () => {
+  const gameLoop = () => {};
+
+  const spawnMino = async () => {
+
+  };
+
+  const newMino = async () => {
     const mino = tetrominoes[Math.floor(Math.random() * 7)];
     setDisplayedMino(handleRandomTetromino(mino));
     setNextMino(mino);
@@ -149,7 +129,9 @@ export default function Game() {
 
   const preStart = async () => {
     setColors();
-    newMino();
+    await newMino();
+    await spawnMino();
+    await newMino();
     setBoard(makeBoard());
   };
 
