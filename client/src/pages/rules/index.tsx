@@ -1,17 +1,14 @@
 import React from "react";
+import Navbar from "@/Components/navbar";
+import Footer from "@/Components/footer";
 
 export default function Rules() {
-  // explpain the rules of Tetris
   return (
     <div>
-      {/* title */}
-      <h1 className="text-6xl font-bold text-center">TSTetris</h1>
-      {/* rules */}
+      <Navbar />
+      <h1 className="text-6xl font-bold text-center">Rules</h1>
       <div className="flex justify-center">
         <div className="flex flex-col">
-          <div className="flex justify-center">
-            <h1 className="text-4xl font-bold">Rules</h1>
-          </div>
           <div className="flex justify-center">
             <ul>
               <li>
@@ -34,6 +31,7 @@ export default function Rules() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
