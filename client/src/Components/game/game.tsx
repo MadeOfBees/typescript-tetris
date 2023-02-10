@@ -37,16 +37,17 @@ export default function Game() {
       ["", "Z", "Z"],
     ],
   ];
-  const [iColor] = useState<string>("bg-red-500");
-  const [jColor] = useState<string>("bg-blue-500");
-  const [lColor] = useState<string>("bg-yellow-500");
-  const [oColor] = useState<string>("bg-green-500");
-  const [sColor] = useState<string>("bg-purple-500");
-  const [tColor] = useState<string>("bg-pink-500");
-  const [zColor] = useState<string>("bg-gray-500");
-  const [boardBGColor] = useState<string>("");
-  const [randomMino, setRandomMino] = useState<Array<Array<string>>>([]);
+  const [iColor, setIColor] = useState<string>("#ff0000");
+  const [jColor, setJColor] = useState<string>("#0000ff");
+  const [lColor, setLColor] = useState<string>("#ffff00");
+  const [oColor, setOColor] = useState<string>("#00ff00");
+  const [sColor, setSColor] = useState<string>("#800080");
+  const [tColor, setTColor] = useState<string>("#ff00ff");
+  const [zColor, setZColor] = useState<string>("#808080");
+  const [boardBGColor, setBoardBGColor] = useState<string>("#ffffff");
+  const [nextMino, setNextMino] = useState<Array<Array<string>>>([]);
   const [board, setBoard] = useState<Array<Array<string>>>([]);
+
   const makeBoard = (): Array<Array<string>> => {
     const board = [];
     for (let i = 0; i < 20; i++) {
@@ -55,13 +56,6 @@ export default function Game() {
         row.push("");
       }
       board.push(row);
-    }
-    const randomTetromino =
-      tetrominoes[Math.floor(Math.random() * tetrominoes.length)];
-    for (let i = 0; i < randomTetromino.length; i++) {
-      for (let j = 0; j < randomTetromino[i].length; j++) {
-        board[i][j] = randomTetromino[i][j];
-      }
     }
     return board;
   };
@@ -83,9 +77,26 @@ export default function Game() {
     return board;
   };
 
+  const setColors = () => {
+    const boardData = localStorage.getItem("board");
+    if (boardData) {
+      const board = JSON.parse(boardData);
+      console.log(board.iColor);
+      setBoardBGColor(board.boardBGColor);
+      setIColor(board.iColor);
+      setJColor(board.jColor);
+      setLColor(board.lColor);
+      setOColor(board.oColor);
+      setSColor(board.sColor);
+      setTColor(board.tColor);
+      setZColor(board.zColor);
+    }
+  };
+
   useEffect(() => {
+    setColors();
     setBoard(makeBoard());
-    setRandomMino(
+    setNextMino(
       handleRandomTetromino(
         tetrominoes[Math.floor(Math.random() * tetrominoes.length)]
       )
@@ -100,23 +111,26 @@ export default function Game() {
           <div className="flex flex-row" key={i}>
             {row.map((cell, j) => (
               <div
-                className={`w-4 h-4 border-2 border-black ${
-                  cell === "I"
-                    ? iColor
-                    : cell === "J"
-                    ? jColor
-                    : cell === "L"
-                    ? lColor
-                    : cell === "O"
-                    ? oColor
-                    : cell === "S"
-                    ? sColor
-                    : cell === "T"
-                    ? tColor
-                    : cell === "Z"
-                    ? zColor
-                    : boardBGColor
-                }`}
+                className={`w-4 h-4 border-2 border-black`}
+                style={{
+                  backgroundColor: `${
+                    cell === "I"
+                      ? iColor
+                      : cell === "J"
+                      ? jColor
+                      : cell === "L"
+                      ? lColor
+                      : cell === "O"
+                      ? oColor
+                      : cell === "S"
+                      ? sColor
+                      : cell === "T"
+                      ? tColor
+                      : cell === "Z"
+                      ? zColor
+                      : boardBGColor
+                  }`,
+                }}
                 key={j}
               ></div>
             ))}
@@ -125,27 +139,30 @@ export default function Game() {
       </div>
       <div className="w-4"></div>
       <div className="flex flex-col">
-        {randomMino.map((row, i) => (
+        {nextMino.map((row, i) => (
           <div className="flex flex-row" key={i}>
             {row.map((cell, j) => (
               <div
-                className={`w-4 h-4 border-2 border-black ${
-                  cell === "I"
-                    ? iColor
-                    : cell === "J"
-                    ? jColor
-                    : cell === "L"
-                    ? lColor
-                    : cell === "O"
-                    ? oColor
-                    : cell === "S"
-                    ? sColor
-                    : cell === "T"
-                    ? tColor
-                    : cell === "Z"
-                    ? zColor
-                    : boardBGColor
-                }`}
+                className={`w-4 h-4 border-2 border-black`}
+                style={{
+                  backgroundColor: `${
+                    cell === "I"
+                      ? iColor
+                      : cell === "J"
+                      ? jColor
+                      : cell === "L"
+                      ? lColor
+                      : cell === "O"
+                      ? oColor
+                      : cell === "S"
+                      ? sColor
+                      : cell === "T"
+                      ? tColor
+                      : cell === "Z"
+                      ? zColor
+                      : boardBGColor
+                  }`,
+                }}
                 key={j}
               ></div>
             ))}

@@ -35,6 +35,11 @@ export default function Navbar() {
                 <p>Leaderboard</p>
               </Link>
             </li>
+            <li>
+              <Link href="/customizeBoard">
+                <p>Customize Board</p>
+              </Link>
+            </li>
           </ul>
         </div>
         <a className="btn btn-ghost normal-case text-xl" href="/">
