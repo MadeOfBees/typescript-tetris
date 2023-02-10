@@ -4,7 +4,7 @@ import ContactDetails from '@/Components/contactDetails'
 
 export default function Document() {
   return (
-    <Html lang="en" data-theme="dracula">
+    <Html lang="en" data-theme="dark">
       <Head />
       <input type="checkbox" id="contactModal" className="modal-toggle" />
       <label htmlFor="contactModal" className="modal cursor-pointer">
