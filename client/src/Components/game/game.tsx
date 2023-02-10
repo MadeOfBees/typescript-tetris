@@ -47,6 +47,25 @@ export default function Game() {
   const [boardBGColor, setBoardBGColor] = useState<string>("#ffffff");
   const [nextMino, setNextMino] = useState<Array<Array<string>>>([]);
   const [board, setBoard] = useState<Array<Array<string>>>([]);
+  const [score, setScore] = useState<number>(0);
+
+  const Dpad = () => {
+    return (
+      <div className="justify-center flex flex-col mt-5">
+        <div className="flex justify-center w-full">
+          <kbd className="kbd">▲</kbd>
+        </div>
+        <div className="flex justify-center w-full">
+          <kbd className="kbd">◀︎</kbd>
+          <kbd className="kbd"></kbd>
+          <kbd className="kbd">▶︎</kbd>
+        </div>
+        <div className="flex justify-center w-full">
+          <kbd className="kbd">▼</kbd>
+        </div>
+      </div>
+    );
+  };
 
   const makeBoard = (): Array<Array<string>> => {
     const board = [];
@@ -104,71 +123,79 @@ export default function Game() {
   }, []);
 
   return (
-    <div className="flex flex-row mt-5">
-      <div className="w-4"></div>
-      <div className="flex flex-col">
-        {board.map((row, i) => (
-          <div className="flex flex-row" key={i}>
-            {row.map((cell, j) => (
-              <div
-                className={`w-4 h-4 border-2 border-black`}
-                style={{
-                  backgroundColor: `${
-                    cell === "I"
-                      ? iColor
-                      : cell === "J"
-                      ? jColor
-                      : cell === "L"
-                      ? lColor
-                      : cell === "O"
-                      ? oColor
-                      : cell === "S"
-                      ? sColor
-                      : cell === "T"
-                      ? tColor
-                      : cell === "Z"
-                      ? zColor
-                      : boardBGColor
-                  }`,
-                }}
-                key={j}
-              ></div>
-            ))}
+    // col so the dpad shows up right
+    <div className="flex flex-col mt-5">
+      <div className="flex flex-row">
+        <div className="w-4"></div>
+        <div className="flex flex-col">
+          {board.map((row, i) => (
+            <div className="flex flex-row" key={i}>
+              {row.map((cell, j) => (
+                <div
+                  className={`w-4 h-4 border-2 border-black`}
+                  style={{
+                    backgroundColor: `${
+                      cell === "I"
+                        ? iColor
+                        : cell === "J"
+                        ? jColor
+                        : cell === "L"
+                        ? lColor
+                        : cell === "O"
+                        ? oColor
+                        : cell === "S"
+                        ? sColor
+                        : cell === "T"
+                        ? tColor
+                        : cell === "Z"
+                        ? zColor
+                        : boardBGColor
+                    }`,
+                  }}
+                  key={j}
+                ></div>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div className="w-4"></div>
+        <div className="flex flex-col">
+          {nextMino.map((row, i) => (
+            <div className="flex flex-row" key={i}>
+              {row.map((cell, j) => (
+                <div
+                  className={`w-4 h-4 border-2 border-black`}
+                  style={{
+                    backgroundColor: `${
+                      cell === "I"
+                        ? iColor
+                        : cell === "J"
+                        ? jColor
+                        : cell === "L"
+                        ? lColor
+                        : cell === "O"
+                        ? oColor
+                        : cell === "S"
+                        ? sColor
+                        : cell === "T"
+                        ? tColor
+                        : cell === "Z"
+                        ? zColor
+                        : boardBGColor
+                    }`,
+                  }}
+                  key={j}
+                ></div>
+              ))}
+            </div>
+          ))}
+          <div>
+            <h1>Score:</h1>
+            <p>{score}</p>
           </div>
-        ))}
+        </div>
       </div>
-      <div className="w-4"></div>
-      <div className="flex flex-col">
-        {nextMino.map((row, i) => (
-          <div className="flex flex-row" key={i}>
-            {row.map((cell, j) => (
-              <div
-                className={`w-4 h-4 border-2 border-black`}
-                style={{
-                  backgroundColor: `${
-                    cell === "I"
-                      ? iColor
-                      : cell === "J"
-                      ? jColor
-                      : cell === "L"
-                      ? lColor
-                      : cell === "O"
-                      ? oColor
-                      : cell === "S"
-                      ? sColor
-                      : cell === "T"
-                      ? tColor
-                      : cell === "Z"
-                      ? zColor
-                      : boardBGColor
-                  }`,
-                }}
-                key={j}
-              ></div>
-            ))}
-          </div>
-        ))}
-      </div>
+      <Dpad />
     </div>
   );
 }
