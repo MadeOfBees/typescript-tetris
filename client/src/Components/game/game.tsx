@@ -45,10 +45,11 @@ export default function Game() {
   const [tColor, setTColor] = useState<string>("#ff00ff");
   const [zColor, setZColor] = useState<string>("#808080");
   const [boardBGColor, setBoardBGColor] = useState<string>("#ffffff");
-  const [nextMino, setNextMino] = useState<Array<Array<string>>>([]);
+  const [displayedMino, setDisplayedMino] = useState<Array<Array<string>>>([]);
   const [board, setBoard] = useState<Array<Array<string>>>([]);
   const [score, setScore] = useState<number>(0);
   const [gameOver, setGameOver] = useState<boolean>(false);
+  const [nextMino, setNextMino] = useState<Array<Array<string>>>([]);
 
   const Dpad = () => {
     return (
@@ -81,16 +82,37 @@ export default function Game() {
   };
 
   const handleRandomTetromino = (tetromino: Array<Array<string>>) => {
-    const board = Array.from({ length: 4 }, () => Array(4).fill(""));
-    const offset = {
-      1: [0, 1],
-      3: [1, 1],
-      4: [1, 0],
-      6: [1, 0],
-    }[tetrominoes.indexOf(tetromino)] || [0, 0];
-    for (let i = 0; i < tetromino.length; i++) {
-      for (let j = 0; j < tetromino[i].length; j++) {
-        board[i + offset[0]][j + offset[1]] = tetromino[i][j];
+    const board = [];
+    for (let i = 0; i < 4; i++) {
+      const row = [];
+      for (let j = 0; j < 4; j++) {
+        row.push("");
+      }
+      board.push(row);
+    }
+    if (tetromino === tetrominoes[1]) {
+      for (let i = 0; i < tetromino.length; i++) {
+        for (let j = 0; j < tetromino[i].length; j++) {
+          board[i][j + 1] = tetromino[i][j];
+        }
+      }
+    } else if (tetromino === tetrominoes[3]) {
+      for (let i = 0; i < tetromino.length; i++) {
+        for (let j = 0; j < tetromino[i].length; j++) {
+          board[i + 1][j + 1] = tetromino[i][j];
+        }
+      }
+    } else if (tetromino === tetrominoes[4] || tetromino === tetrominoes[6]) {
+      for (let i = 0; i < tetromino.length; i++) {
+        for (let j = 0; j < tetromino[i].length; j++) {
+          board[i + 1][j] = tetromino[i][j];
+        }
+      }
+    } else {
+      for (let i = 0; i < tetromino.length; i++) {
+        for (let j = 0; j < tetromino[i].length; j++) {
+          board[i][j] = tetromino[i][j];
+        }
       }
     }
     return board;
@@ -112,14 +134,22 @@ export default function Game() {
   };
 
   const startGame = () => {
-    
+    const interval = setInterval(() => {
+      if (!gameOver) {
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  };
+
+  const newMino = () => {
+    const mino = tetrominoes[Math.floor(Math.random() * 7)];
+    setDisplayedMino(handleRandomTetromino(mino));
+    setNextMino(mino);
   };
 
   const preStart = async () => {
     setColors();
-    const nextMino = tetrominoes[Math.floor(Math.random() * 7)];
-    setNextMino(nextMino);
-    handleRandomTetromino(nextMino);
+    newMino();
     setBoard(makeBoard());
   };
 
@@ -174,7 +204,7 @@ export default function Game() {
         </div>
         <div className="w-4"></div>
         <div className="flex flex-col">
-          {nextMino.map((row, i) => (
+          {displayedMino.map((row, i) => (
             <div className="flex flex-row" key={i}>
               {row.map((cell, j) => (
                 <Cell cell={cell} j={j} key={j} />
