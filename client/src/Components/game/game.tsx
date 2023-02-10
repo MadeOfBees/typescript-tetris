@@ -80,17 +80,16 @@ export default function Game() {
   };
 
   const handleRandomTetromino = (tetromino: Array<Array<string>>) => {
-    const board = [];
-    for (let i = 0; i < 4; i++) {
-      const row = [];
-      for (let j = 0; j < 4; j++) {
-        row.push("");
-      }
-      board.push(row);
-    }
+    const board = Array.from({ length: 4 }, () => Array(4).fill(""));
+    const offset = {
+      1: [0, 1],
+      3: [1, 1],
+      4: [1, 0],
+      6: [1, 0],
+    }[tetrominoes.indexOf(tetromino)] || [0, 0];
     for (let i = 0; i < tetromino.length; i++) {
       for (let j = 0; j < tetromino[i].length; j++) {
-        board[i][j] = tetromino[i][j];
+        board[i + offset[0]][j + offset[1]] = tetromino[i][j];
       }
     }
     return board;
@@ -122,8 +121,35 @@ export default function Game() {
     );
   }, []);
 
+  const Cell = ({ cell, j }: { cell: string; j: number }) => {
+    return (
+      <div
+        className={`w-4 h-4 border-2 border-black`}
+        style={{
+          backgroundColor: `${
+            cell === "I"
+              ? iColor
+              : cell === "J"
+              ? jColor
+              : cell === "L"
+              ? lColor
+              : cell === "O"
+              ? oColor
+              : cell === "S"
+              ? sColor
+              : cell === "T"
+              ? tColor
+              : cell === "Z"
+              ? zColor
+              : boardBGColor
+          }`,
+        }}
+        key={j}
+      ></div>
+    );
+  };
+
   return (
-    // col so the dpad shows up right
     <div className="flex flex-col mt-5">
       <div className="flex flex-row">
         <div className="w-4"></div>
@@ -131,29 +157,7 @@ export default function Game() {
           {board.map((row, i) => (
             <div className="flex flex-row" key={i}>
               {row.map((cell, j) => (
-                <div
-                  className={`w-4 h-4 border-2 border-black`}
-                  style={{
-                    backgroundColor: `${
-                      cell === "I"
-                        ? iColor
-                        : cell === "J"
-                        ? jColor
-                        : cell === "L"
-                        ? lColor
-                        : cell === "O"
-                        ? oColor
-                        : cell === "S"
-                        ? sColor
-                        : cell === "T"
-                        ? tColor
-                        : cell === "Z"
-                        ? zColor
-                        : boardBGColor
-                    }`,
-                  }}
-                  key={j}
-                ></div>
+                <Cell cell={cell} j={j} key={j} />
               ))}
             </div>
           ))}
@@ -163,29 +167,7 @@ export default function Game() {
           {nextMino.map((row, i) => (
             <div className="flex flex-row" key={i}>
               {row.map((cell, j) => (
-                <div
-                  className={`w-4 h-4 border-2 border-black`}
-                  style={{
-                    backgroundColor: `${
-                      cell === "I"
-                        ? iColor
-                        : cell === "J"
-                        ? jColor
-                        : cell === "L"
-                        ? lColor
-                        : cell === "O"
-                        ? oColor
-                        : cell === "S"
-                        ? sColor
-                        : cell === "T"
-                        ? tColor
-                        : cell === "Z"
-                        ? zColor
-                        : boardBGColor
-                    }`,
-                  }}
-                  key={j}
-                ></div>
+                <Cell cell={cell} j={j} key={j} />
               ))}
             </div>
           ))}
