@@ -50,6 +50,9 @@ export default function Game() {
   const [score, setScore] = useState<number>(0);
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [nextMino, setNextMino] = useState<Array<Array<string>>>([]);
+  const [currentMinoSpacesTaken, setCurrentMinoSpacesTaken] = useState<
+    Array<string>
+  >([]);
 
   const Dpad = () => {
     return (
@@ -82,14 +85,19 @@ export default function Game() {
   };
 
   const handleRandomTetromino = (tetromino: string[][]) => {
-    const board = Array(4).fill(null).map(() => Array(4).fill(''));
-    let x = 0, y = 0;
+    const board = Array(4)
+      .fill(null)
+      .map(() => Array(4).fill(""));
+    let x = 0,
+      y = 0;
     if (tetromino === tetrominoes[1]) y = 1;
     else if (tetromino === tetrominoes[3]) x = y = 1;
-    else if (tetromino === tetrominoes[4] || tetromino === tetrominoes[6]) x = 1;
-    tetromino.forEach((r, i) => r.forEach((c, j) => board[i + x][j + y] = c));
-    return board;
-  };  
+    else if (tetromino === tetrominoes[4] || tetromino === tetrominoes[6])
+      x = 1;
+    tetromino.forEach((r, i) => r.forEach((c, j) => (board[i + x][j + y] = c)));
+    setDisplayedMino(board);
+    return;
+  };
 
   const setColors = () => {
     const boardData = localStorage.getItem("board");
@@ -117,22 +125,37 @@ export default function Game() {
 
   const gameLoop = () => {};
 
-  const spawnMino = async () => {
-
-  };
+  const dropMino = async () => {};
 
   const newMino = async () => {
     const mino = tetrominoes[Math.floor(Math.random() * 7)];
-    setDisplayedMino(handleRandomTetromino(mino));
-    setNextMino(mino);
+    return mino;
+  };
+
+  const spawnMino = async (mino: string[][]) => {
+    let newBoard: string[][];
+    if (board.length < 1) {
+      newBoard = await makeBoard();
+    } else {
+      newBoard = board;
+    }
+    const newCurrentMinoSpacesTaken: string[] = [];
+    mino.forEach((r, i) =>
+      r.forEach((c, j) => {
+        if (c) {
+          newBoard[i][j] = c;
+          newCurrentMinoSpacesTaken.push(`${i},${j}`);
+        }
+      })
+    );
+    setBoard(newBoard);
+    setCurrentMinoSpacesTaken(newCurrentMinoSpacesTaken);
   };
 
   const preStart = async () => {
     setColors();
-    await newMino();
-    await spawnMino();
-    await newMino();
-    setBoard(makeBoard());
+    handleRandomTetromino(await newMino());
+    spawnMino(await newMino());
   };
 
   useEffect(() => {
