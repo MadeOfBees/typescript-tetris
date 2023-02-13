@@ -58,7 +58,6 @@ export default function Game() {
       Array.from({ length: 4 }, () => ({ value: "", isPlayed: false }))
     )
   );
-  const [nextMino, setNextMino] = useState<Array<Array<string>>>([]);
   const [score, setScore] = useState<number>(0);
   const [gameOver, setGameOver] = useState<boolean>(false);
 
@@ -80,7 +79,7 @@ export default function Game() {
     );
   };
 
-  const handleRandomTetromino = (tetromino: string[][]) => {
+  const displayNextTetramino = (tetromino: string[][]) => {
     let newTetromino: Array<Array<{ value: string; isPlayed: boolean }>> = [];
     for (let i = 0; i < 4; i++) {
       let row: Array<{ value: string; isPlayed: boolean }> = [];
@@ -103,7 +102,22 @@ export default function Game() {
     setDisplayedMino(newTetromino);
   };
 
-  const setColors = () => {
+  const startNewGame = () => {
+    setBoard(
+      Array.from({ length: 20 }, () =>
+        Array.from({ length: 10 }, () => ({ value: "", isPlayed: false }))
+      )
+    );
+    setDisplayedMino(
+      Array.from({ length: 4 }, () =>
+        Array.from({ length: 4 }, () => ({ value: "", isPlayed: false }))
+      )
+    );
+    setScore(0);
+    setGameOver(false);
+  };
+
+  const setColors = async () => {
     const boardData = localStorage.getItem("board");
     if (boardData) {
       const board = JSON.parse(boardData);
@@ -119,11 +133,13 @@ export default function Game() {
   };
 
   const setDisplay = (
-    tetromino: string[][],
-    board: Array<Array<{ value: string; isPlayed: boolean }>>
+    gameNextMinos: Array<Array<string>>,
+    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>,
+    gameScore: number
   ) => {
-    setBoard(board);
-    handleRandomTetromino(tetromino);
+    displayNextTetramino(gameNextMinos);
+    setBoard(gameBoard);
+    setScore(gameScore);
   };
 
   const newMino = async () => {
@@ -164,6 +180,116 @@ export default function Game() {
       ></div>
     );
   };
+
+  const startGame = async () => {
+    let gameObj = {
+      gameNextMino: await newMino(),
+      gameBoard: Array.from({ length: 20 }, () =>
+        Array.from({ length: 10 }, () => ({ value: "", isPlayed: false }))
+      ),
+      currentScore: 0,
+    };
+    const updateB = setInterval(async () => {
+      if (!gameOver) {
+        gameObj = await gameTick(
+          gameObj.gameNextMino,
+          gameObj.gameBoard,
+          gameObj.currentScore
+        );
+        setDisplay(
+          gameObj.gameNextMino,
+          gameObj.gameBoard,
+          gameObj.currentScore
+        );
+      }
+    }, 1000);
+    updateB;
+  };
+
+  const gameTick = async (
+    gameNextMino: string[][],
+    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>,
+    currentScore: number
+  ) => {
+    let emptyRows = 0;
+    for (let i = 0; i < gameBoard.length; i++) {
+      let emptyRow = true;
+      for (let j = 0; j < gameBoard[i].length; j++) {
+        if (gameBoard[i][j].value !== "") {
+          emptyRow = false;
+          break;
+        }
+      }
+      if (emptyRow) emptyRows++;
+    }
+    if (emptyRows === 20) {
+      gameBoard = await spawnMino(gameNextMino, gameBoard);
+      gameNextMino = await newMino();
+    } else {
+      gameBoard = await minoFall(gameBoard);
+    }
+    return {
+      gameNextMino: gameNextMino,
+      gameBoard: gameBoard,
+      currentScore: currentScore,
+    };
+  };
+
+  const spawnMino = async (
+    gameNextMino: string[][],
+    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
+  ) => {
+    let canSpawn = true;
+    for (let i = 0; i < gameNextMino.length; i++) {
+      for (let j = 0; j < gameNextMino[i].length; j++) {
+        if (gameNextMino[i][j] !== "") {
+          if (gameBoard[i][j + 4].value !== "") {
+            canSpawn = false;
+            break;
+          }
+        }
+      }
+      if (!canSpawn) break;
+    }
+    if (canSpawn) {
+      // spawn to the middle of the board + 1 column
+      for (let i = 0; i < gameNextMino.length; i++) {
+        for (let j = 0; j < gameNextMino[i].length; j++) {
+          if (gameNextMino[i][j] !== "") {
+            gameBoard[i][j + 4].value = gameNextMino[i][j];
+            gameBoard[i][j + 4].isPlayed = true;
+          }
+        }
+      }
+    }
+    return gameBoard;
+  };
+
+  const minoFall = async (
+    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
+  ) => {
+    for (let i = gameBoard.length - 1; i >= 0; i--) {
+      for (let j = 0; j < gameBoard[i].length; j++) {
+        if (gameBoard[i][j].isPlayed) {
+          if (i === gameBoard.length - 1) {
+            gameBoard[i][j].isPlayed = false;
+          } else if (gameBoard[i + 1][j].value === "") {
+            gameBoard[i + 1][j].value = gameBoard[i][j].value;
+            gameBoard[i + 1][j].isPlayed = true;
+            gameBoard[i][j].value = "";
+            gameBoard[i][j].isPlayed = false;
+          } else {
+            gameBoard[i][j].isPlayed = false;
+          }
+        }
+      }
+    }
+    return gameBoard;
+  };
+
+  useEffect(() => {
+    setColors().then(startGame);
+  }, [gameOver]);
 
   return (
     <div className="flex flex-col mt-5">
