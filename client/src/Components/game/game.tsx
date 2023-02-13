@@ -45,14 +45,15 @@ export default function Game() {
   const [tColor, setTColor] = useState<string>("#ff00ff");
   const [zColor, setZColor] = useState<string>("#808080");
   const [boardBGColor, setBoardBGColor] = useState<string>("#ffffff");
-  const [displayedMino, setDisplayedMino] = useState<Array<Array<string>>>([]);
-  const [board, setBoard] = useState<Array<Array<string>>>([]);
+  const [board, setBoard] = useState<
+    Array<Array<{ value: string; isPlayed: boolean }>>
+  >([]);
+  const [displayedMino, setDisplayedMino] = useState<
+    Array<Array<{ value: string; isPlayed: boolean }>>
+  >([]);
+  const [nextMino, setNextMino] = useState<Array<Array<string>>>([]);
   const [score, setScore] = useState<number>(0);
   const [gameOver, setGameOver] = useState<boolean>(false);
-  const [nextMino, setNextMino] = useState<Array<Array<string>>>([]);
-  const [currentMinoSpacesTaken, setCurrentMinoSpacesTaken] = useState<
-    Array<string>
-  >([]);
 
   const Dpad = () => {
     return (
@@ -72,12 +73,12 @@ export default function Game() {
     );
   };
 
-  const makeBoard = (): Array<Array<string>> => {
-    const board = [];
+  const makeBoard = (): { value: string; isPlayed: boolean }[][] => {
+    let board: { value: string; isPlayed: boolean }[][] = [];
     for (let i = 0; i < 20; i++) {
-      const row = [];
+      let row: { value: string; isPlayed: boolean }[] = [];
       for (let j = 0; j < 10; j++) {
-        row.push("");
+        row.push({ value: "", isPlayed: false });
       }
       board.push(row);
     }
@@ -85,18 +86,26 @@ export default function Game() {
   };
 
   const handleRandomTetromino = (tetromino: string[][]) => {
-    const board = Array(4)
-      .fill(null)
-      .map(() => Array(4).fill(""));
+    let newTetromino: Array<Array<{ value: string; isPlayed: boolean }>> = [];
+    for (let i = 0; i < 4; i++) {
+      let row: Array<{ value: string; isPlayed: boolean }> = [];
+      for (let j = 0; j < 4; j++) {
+        row.push({ value: "", isPlayed: false });
+      }
+      newTetromino.push(row);
+    }
     let x = 0,
       y = 0;
     if (tetromino === tetrominoes[1]) y = 1;
     else if (tetromino === tetrominoes[3]) x = y = 1;
     else if (tetromino === tetrominoes[4] || tetromino === tetrominoes[6])
       x = 1;
-    tetromino.forEach((r, i) => r.forEach((c, j) => (board[i + x][j + y] = c)));
-    setDisplayedMino(board);
-    return;
+    for (let i = 0; i < tetromino.length; i++) {
+      for (let j = 0; j < tetromino[i].length; j++) {
+        newTetromino[i + x][j + y].value = tetromino[i][j];
+      }
+    }
+    setDisplayedMino(newTetromino);
   };
 
   const setColors = () => {
@@ -133,23 +142,13 @@ export default function Game() {
   };
 
   const spawnMino = async (mino: string[][]) => {
-    let newBoard: string[][];
+    let newBoard = [];
     if (board.length < 1) {
       newBoard = await makeBoard();
     } else {
       newBoard = board;
     }
-    const newCurrentMinoSpacesTaken: string[] = [];
-    mino.forEach((r, i) =>
-      r.forEach((c, j) => {
-        if (c) {
-          newBoard[i][j] = c;
-          newCurrentMinoSpacesTaken.push(`${i},${j}`);
-        }
-      })
-    );
     setBoard(newBoard);
-    setCurrentMinoSpacesTaken(newCurrentMinoSpacesTaken);
   };
 
   const preStart = async () => {
@@ -165,26 +164,31 @@ export default function Game() {
       });
     })();
   }, []);
+  interface CellProps {
+    cell: { value: string; isPlayed: boolean };
+    j: number;
+    key: number;
+  }
 
-  const Cell = ({ cell, j }: { cell: string; j: number }) => {
+  const Cell = ({ cell, j }: CellProps) => {
     return (
       <div
         className={`w-4 h-4 border-2 border-black`}
         style={{
           backgroundColor: `${
-            cell === "I"
+            cell.value === "I"
               ? iColor
-              : cell === "J"
+              : cell.value === "J"
               ? jColor
-              : cell === "L"
+              : cell.value === "L"
               ? lColor
-              : cell === "O"
+              : cell.value === "O"
               ? oColor
-              : cell === "S"
+              : cell.value === "S"
               ? sColor
-              : cell === "T"
+              : cell.value === "T"
               ? tColor
-              : cell === "Z"
+              : cell.value === "Z"
               ? zColor
               : boardBGColor
           }`,
