@@ -252,7 +252,6 @@ export default function Game() {
       if (!canSpawn) break;
     }
     if (canSpawn) {
-      // spawn to the middle of the board + 1 column
       for (let i = 0; i < gameNextMino.length; i++) {
         for (let j = 0; j < gameNextMino[i].length; j++) {
           if (gameNextMino[i][j] !== "") {
