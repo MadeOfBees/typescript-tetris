@@ -28,7 +28,6 @@ export default function Game() {
       ["S", "S", ""],
     ],
     [
-      ["", "", ""],
       ["T", "T", "T"],
       ["", "T", ""],
     ],
@@ -47,10 +46,18 @@ export default function Game() {
   const [boardBGColor, setBoardBGColor] = useState<string>("#ffffff");
   const [board, setBoard] = useState<
     Array<Array<{ value: string; isPlayed: boolean }>>
-  >([]);
+  >(
+    Array.from({ length: 20 }, () =>
+      Array.from({ length: 10 }, () => ({ value: "", isPlayed: false }))
+    )
+  );
   const [displayedMino, setDisplayedMino] = useState<
     Array<Array<{ value: string; isPlayed: boolean }>>
-  >([]);
+  >(
+    Array.from({ length: 4 }, () =>
+      Array.from({ length: 4 }, () => ({ value: "", isPlayed: false }))
+    )
+  );
   const [nextMino, setNextMino] = useState<Array<Array<string>>>([]);
   const [score, setScore] = useState<number>(0);
   const [gameOver, setGameOver] = useState<boolean>(false);
@@ -73,18 +80,6 @@ export default function Game() {
     );
   };
 
-  const makeBoard = (): { value: string; isPlayed: boolean }[][] => {
-    let board: { value: string; isPlayed: boolean }[][] = [];
-    for (let i = 0; i < 20; i++) {
-      let row: { value: string; isPlayed: boolean }[] = [];
-      for (let j = 0; j < 10; j++) {
-        row.push({ value: "", isPlayed: false });
-      }
-      board.push(row);
-    }
-    return board;
-  };
-
   const handleRandomTetromino = (tetromino: string[][]) => {
     let newTetromino: Array<Array<{ value: string; isPlayed: boolean }>> = [];
     for (let i = 0; i < 4; i++) {
@@ -98,7 +93,7 @@ export default function Game() {
       y = 0;
     if (tetromino === tetrominoes[1]) y = 1;
     else if (tetromino === tetrominoes[3]) x = y = 1;
-    else if (tetromino === tetrominoes[4] || tetromino === tetrominoes[6])
+    else if (tetromino === tetrominoes[4] || tetromino === tetrominoes[5])
       x = 1;
     for (let i = 0; i < tetromino.length; i++) {
       for (let j = 0; j < tetromino[i].length; j++) {
@@ -123,47 +118,19 @@ export default function Game() {
     }
   };
 
-  const startGame = () => {
-    const interval = setInterval(() => {
-      if (!gameOver) {
-        gameLoop();
-      }
-    }, 500);
-    return () => clearInterval(interval);
+  const setDisplay = (
+    tetromino: string[][],
+    board: Array<Array<{ value: string; isPlayed: boolean }>>
+  ) => {
+    setBoard(board);
+    handleRandomTetromino(tetromino);
   };
 
-  const gameLoop = () => {};
-
-  const dropMino = async () => {};
-
   const newMino = async () => {
-    const mino = tetrominoes[Math.floor(Math.random() * 7)];
+    const mino = tetrominoes[Math.floor(Math.random() * tetrominoes.length)];
     return mino;
   };
 
-  const spawnMino = async (mino: string[][]) => {
-    let newBoard = [];
-    if (board.length < 1) {
-      newBoard = await makeBoard();
-    } else {
-      newBoard = board;
-    }
-    setBoard(newBoard);
-  };
-
-  const preStart = async () => {
-    setColors();
-    handleRandomTetromino(await newMino());
-    spawnMino(await newMino());
-  };
-
-  useEffect(() => {
-    (async () => {
-      await preStart().then(() => {
-        startGame();
-      });
-    })();
-  }, []);
   interface CellProps {
     cell: { value: string; isPlayed: boolean };
     j: number;
