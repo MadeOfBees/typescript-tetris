@@ -58,8 +58,10 @@ export default function Game() {
       Array.from({ length: 4 }, () => ({ value: "", isPlayed: false }))
     )
   );
+  let fallCount = 0;
   const [score, setScore] = useState<number>(0);
   const [gameOver, setGameOver] = useState<boolean>(false);
+  const [gameSpeed, setGameSpeed] = useState<number>(15);
 
   const Dpad = () => {
     return (
@@ -91,7 +93,8 @@ export default function Game() {
     let x = 0,
       y = 0;
     if (tetromino === tetrominoes[1]) y = 1;
-    else if (tetromino === tetrominoes[3]) x = y = 1;
+    else if (tetromino === tetrominoes[3] || tetromino === tetrominoes[6])
+      x = y = 1;
     else if (tetromino === tetrominoes[4] || tetromino === tetrominoes[5])
       x = 1;
     for (let i = 0; i < tetromino.length; i++) {
@@ -202,7 +205,7 @@ export default function Game() {
           gameObj.currentScore
         );
       }
-    }, 1000);
+    }, 50);
     updateB;
   };
 
@@ -226,7 +229,13 @@ export default function Game() {
       gameBoard = await spawnMino(gameNextMino, gameBoard);
       gameNextMino = await newMino();
     } else {
-      gameBoard = await minoFall(gameBoard);
+      if (fallCount === 0) {
+        gameBoard = await minoFall(gameBoard);
+        fallCount++;
+      } else {
+        fallCount++;
+        if (fallCount === gameSpeed) fallCount = 0;
+      }
     }
     return {
       gameNextMino: gameNextMino,
@@ -251,12 +260,16 @@ export default function Game() {
       }
       if (!canSpawn) break;
     }
+    let offset = 3;
+    if (gameNextMino[0][1] === "O" || gameNextMino[1][1] === "J") {
+      offset = 4;
+    }
     if (canSpawn) {
       for (let i = 0; i < gameNextMino.length; i++) {
         for (let j = 0; j < gameNextMino[i].length; j++) {
           if (gameNextMino[i][j] !== "") {
-            gameBoard[i][j + 4].value = gameNextMino[i][j];
-            gameBoard[i][j + 4].isPlayed = true;
+            gameBoard[i][j + offset].value = gameNextMino[i][j];
+            gameBoard[i][j + offset].isPlayed = true;
           }
         }
       }
