@@ -401,22 +401,37 @@ export default function Game() {
         if (gameBoard[i][j].isPlayed) {
           if (direction === "left") {
             if (j === 0) return false;
-            if (gameBoard[i][j-1].value !== "" && !gameBoard[i][j-1].isPlayed) return false; 
+            if (
+              gameBoard[i][j - 1].value !== "" &&
+              !gameBoard[i][j - 1].isPlayed
+            )
+              return false;
           } else if (direction === "right") {
             if (j === gameBoard[i].length - 1) return false;
-            if (gameBoard[i][j+1].value !== "" && !gameBoard[i][j+1].isPlayed) return false;
+            if (
+              gameBoard[i][j + 1].value !== "" &&
+              !gameBoard[i][j + 1].isPlayed
+            )
+              return false;
           }
         }
       }
     }
     return true;
   };
-  
 
   const rotate = async (
     gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
   ) => {
+    if (await canRotate(gameBoard)) {
+    }
     return gameBoard;
+  };
+
+  const canRotate = async (
+    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
+  ) => {
+    return true;
   };
 
   const moveDown = async (
