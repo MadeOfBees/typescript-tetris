@@ -482,6 +482,7 @@ export default function Game() {
     gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>,
     gameNextMino: string[][]
   ) => {
+    fallCount = 0;
     let canFall = true;
     for (let i = gameBoard.length - 1; i >= 0; i--) {
       for (let j = 0; j < gameBoard[i].length; j++) {
