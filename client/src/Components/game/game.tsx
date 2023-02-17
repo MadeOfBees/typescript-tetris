@@ -78,6 +78,7 @@ export default function Game() {
         rightHeld: false,
       };
       localStorage.setItem("move", JSON.stringify(move));
+      pulseKey(key);
     } else {
       const move = JSON.parse(localStorage.getItem("move") || "null");
       switch (key) {
@@ -299,12 +300,15 @@ export default function Game() {
       gameNextMino = await newMino();
     } else {
       if (fallCount === 0) {
-        const newGameBoard = await minoFall(gameBoard);
-        gameBoard = await handlePlayerMove(newGameBoard);
+        const newGameObj = await minoFall(gameBoard, gameNextMino);
+        gameBoard = newGameObj.gameBoard;
+        gameNextMino = newGameObj.gameNextMino;
         fallCount++;
       } else {
         fallCount++;
-        gameBoard = await handlePlayerMove(gameBoard);
+        const newGameObj = await handlePlayerMove(gameBoard, gameNextMino);
+        gameBoard = newGameObj.gameBoard;
+        gameNextMino = newGameObj.gameNextMino;
         if (fallCount === gameSpeed) fallCount = 0;
       }
     }
@@ -316,7 +320,8 @@ export default function Game() {
   };
 
   const handlePlayerMove = async (
-    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
+    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>,
+    gameNextMino: string[][]
   ) => {
     const parsedLSVal = JSON.parse(
       localStorage.getItem("move") || JSON.stringify(defaultLSVal)
@@ -326,19 +331,32 @@ export default function Game() {
     } else if (parsedLSVal.rightHeld) {
       gameBoard = await moveRight(gameBoard);
     } else if (parsedLSVal.downHeld) {
-      gameBoard = await moveDown(gameBoard);
+      const gameObj = await moveDown(gameBoard, gameNextMino);
+      gameBoard = gameObj.gameBoard;
+      gameNextMino = gameObj.gameNextMino;
     } else if (parsedLSVal.upHeld) {
       gameBoard = await rotate(gameBoard);
     }
     localStorage.setItem("move", JSON.stringify(defaultLSVal));
-    return gameBoard;
+    const gameObj = {
+      gameBoard: gameBoard,
+      gameNextMino: gameNextMino,
+
+    }
+    return gameObj;
   };
 
   const moveHorizontal = async (
     direction: string,
     gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
   ) => {
-    return gameBoard;
+    const newGameBoard = gameBoard;
+    if (direction === "left") {
+      //
+    } else if (direction === "right") {
+      //
+    }
+    return newGameBoard;
   };
 
   const rotate = async (
@@ -362,10 +380,11 @@ export default function Game() {
   };
 
   const moveDown = async (
-    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
+    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>,
+    gameNextMino: string[][]
   ) => {
-    const newGameBoard = await minoFall(gameBoard);
-    return newGameBoard;
+    const newGameObj = await minoFall(gameBoard, gameNextMino);
+    return newGameObj;
   };
 
   const spawnMino = async (
@@ -402,25 +421,60 @@ export default function Game() {
   };
 
   const minoFall = async (
-    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
+    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>,
+    gameNextMino: string[][]
   ) => {
+    let canFall = true;
     for (let i = gameBoard.length - 1; i >= 0; i--) {
       for (let j = 0; j < gameBoard[i].length; j++) {
         if (gameBoard[i][j].isPlayed) {
           if (i === gameBoard.length - 1) {
-            gameBoard[i][j].isPlayed = false;
-          } else if (gameBoard[i + 1][j].value === "") {
-            gameBoard[i + 1][j].value = gameBoard[i][j].value;
-            gameBoard[i + 1][j].isPlayed = true;
-            gameBoard[i][j].value = "";
-            gameBoard[i][j].isPlayed = false;
-          } else {
-            gameBoard[i][j].isPlayed = false;
+            canFall = false;
+            break;
+          } else if (
+            gameBoard[i + 1][j].value !== "" &&
+            gameBoard[i + 1][j].isPlayed === false
+          ) {
+            canFall = false;
+            break;
           }
         }
       }
     }
-    return gameBoard;
+    if (!canFall) {
+      for (let i = 0; i < gameBoard.length; i++) {
+        for (let j = 0; j < gameBoard[i].length; j++) {
+          if (gameBoard[i][j].isPlayed) {
+            gameBoard[i][j].isPlayed = false;
+          }
+        }
+      }
+      gameBoard = await spawnMino(gameNextMino, gameBoard);
+      gameNextMino = await newMino();
+    } else {
+      for (let i = gameBoard.length - 1; i >= 0; i--) {
+        for (let j = 0; j < gameBoard[i].length; j++) {
+          if (gameBoard[i][j].isPlayed) {
+            if (i === gameBoard.length - 1) {
+              gameBoard[i][j].isPlayed = false;
+            } else if (gameBoard[i + 1][j].value === "") {
+              gameBoard[i + 1][j].value = gameBoard[i][j].value;
+              gameBoard[i + 1][j].isPlayed = true;
+              gameBoard[i][j].value = "";
+              gameBoard[i][j].isPlayed = false;
+            } else {
+              gameBoard[i][j].isPlayed = false;
+            }
+          }
+        }
+      }
+    }
+
+    const gameObj = {
+      gameBoard: gameBoard,
+      gameNextMino: gameNextMino,
+    }
+    return gameObj;
   };
 
   useEffect(() => {
