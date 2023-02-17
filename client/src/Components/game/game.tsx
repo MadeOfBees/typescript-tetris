@@ -62,20 +62,88 @@ export default function Game() {
   const [score, setScore] = useState<number>(0);
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [gameSpeed, setGameSpeed] = useState<number>(15);
+  const defaultLSVal = {
+    leftHeld: false,
+    rightHeld: false,
+    downHeld: false,
+    upHeld: false,
+  };
+
+  const pulseKey = (key: string) => {
+    if (!localStorage.getItem("move")) {
+      const move = {
+        upHeld: false,
+        downHeld: false,
+        leftHeld: false,
+        rightHeld: false,
+      };
+      localStorage.setItem("move", JSON.stringify(move));
+    } else {
+      const move = JSON.parse(localStorage.getItem("move") || "null");
+      switch (key) {
+        case "ArrowUp":
+          move.upHeld = true;
+          break;
+        case "ArrowDown":
+          move.downHeld = true;
+          break;
+        case "ArrowLeft":
+          move.leftHeld = true;
+          break;
+        case "ArrowRight":
+          move.rightHeld = true;
+          break;
+      }
+      localStorage.setItem("move", JSON.stringify(move));
+    }
+  };
 
   const Dpad = () => {
     return (
       <div className="justify-center flex flex-col mt-5">
         <div className="flex justify-center w-full">
-          <kbd className="kbd">▲</kbd>
+          <button
+            className="kbd"
+            onMouseDown={() => {
+              pulseKey("ArrowUp");
+            }}
+          >
+            ▲
+          </button>
         </div>
         <div className="flex justify-center w-full">
-          <kbd className="kbd">◀︎</kbd>
-          <kbd className="kbd"></kbd>
-          <kbd className="kbd">▶︎</kbd>
+          <button
+            className="kbd"
+            onMouseDown={() => {
+              pulseKey("ArrowLeft");
+            }}
+          >
+            ◀︎
+          </button>
+          <button
+            className="kbd"
+            style={{ width: "2.25rem", height: "2.25rem" }}
+          >
+            ⚪
+          </button>
+          <button
+            className="kbd"
+            onMouseDown={() => {
+              pulseKey("ArrowRight");
+            }}
+          >
+            ▶︎
+          </button>
         </div>
         <div className="flex justify-center w-full">
-          <kbd className="kbd">▼</kbd>
+          <button
+            className="kbd"
+            onMouseDown={() => {
+              pulseKey("ArrowDown");
+            }}
+          >
+            ▼
+          </button>
         </div>
       </div>
     );
@@ -185,6 +253,7 @@ export default function Game() {
   };
 
   const startGame = async () => {
+    localStorage.setItem("move", JSON.stringify(defaultLSVal));
     let gameObj = {
       gameNextMino: await newMino(),
       gameBoard: Array.from({ length: 20 }, () =>
@@ -230,10 +299,12 @@ export default function Game() {
       gameNextMino = await newMino();
     } else {
       if (fallCount === 0) {
-        gameBoard = await minoFall(gameBoard);
+        const newGameBoard = await minoFall(gameBoard);
+        gameBoard = await handlePlayerMove(newGameBoard);
         fallCount++;
       } else {
         fallCount++;
+        gameBoard = await handlePlayerMove(gameBoard);
         if (fallCount === gameSpeed) fallCount = 0;
       }
     }
@@ -242,6 +313,59 @@ export default function Game() {
       gameBoard: gameBoard,
       currentScore: currentScore,
     };
+  };
+
+  const handlePlayerMove = async (
+    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
+  ) => {
+    const parsedLSVal = JSON.parse(
+      localStorage.getItem("move") || JSON.stringify(defaultLSVal)
+    );
+    if (parsedLSVal.leftHeld) {
+      gameBoard = await moveLeft(gameBoard);
+    } else if (parsedLSVal.rightHeld) {
+      gameBoard = await moveRight(gameBoard);
+    } else if (parsedLSVal.downHeld) {
+      gameBoard = await moveDown(gameBoard);
+    } else if (parsedLSVal.upHeld) {
+      gameBoard = await rotate(gameBoard);
+    }
+    localStorage.setItem("move", JSON.stringify(defaultLSVal));
+    return gameBoard;
+  };
+
+  const moveHorizontal = async (
+    direction: string,
+    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
+  ) => {
+    return gameBoard;
+  };
+
+  const rotate = async (
+    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
+  ) => {
+    return gameBoard;
+  };
+
+  const moveLeft = async (
+    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
+  ) => {
+    const newGameBoard = await moveHorizontal("left", gameBoard);
+    return newGameBoard;
+  };
+
+  const moveRight = async (
+    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
+  ) => {
+    const newGameBoard = await moveHorizontal("right", gameBoard);
+    return newGameBoard;
+  };
+
+  const moveDown = async (
+    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
+  ) => {
+    const newGameBoard = await minoFall(gameBoard);
+    return newGameBoard;
   };
 
   const spawnMino = async (
