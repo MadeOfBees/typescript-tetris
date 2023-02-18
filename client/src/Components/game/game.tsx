@@ -70,17 +70,17 @@ export default function Game() {
   };
 
   const pulseKey = (key: string) => {
-    if (!localStorage.getItem("move")) {
+    if (!sessionStorage.getItem("move")) {
       const move = {
         upHeld: false,
         downHeld: false,
         leftHeld: false,
         rightHeld: false,
       };
-      localStorage.setItem("move", JSON.stringify(move));
+      sessionStorage.setItem("move", JSON.stringify(move));
       pulseKey(key);
     } else {
-      const move = JSON.parse(localStorage.getItem("move") || "null");
+      const move = JSON.parse(sessionStorage.getItem("move") || "null");
       switch (key) {
         case "ArrowUp":
           move.upHeld = true;
@@ -95,7 +95,7 @@ export default function Game() {
           move.rightHeld = true;
           break;
       }
-      localStorage.setItem("move", JSON.stringify(move));
+      sessionStorage.setItem("move", JSON.stringify(move));
     }
   };
 
@@ -254,7 +254,7 @@ export default function Game() {
   };
 
   const startGame = async () => {
-    localStorage.setItem("move", JSON.stringify(defaultLSVal));
+    sessionStorage.setItem("move", JSON.stringify(defaultLSVal));
     let gameObj = {
       gameNextMino: await newMino(),
       gameBoard: Array.from({ length: 20 }, () =>
@@ -324,7 +324,7 @@ export default function Game() {
     gameNextMino: string[][]
   ) => {
     const parsedLSVal = JSON.parse(
-      localStorage.getItem("move") || JSON.stringify(defaultLSVal)
+      sessionStorage.getItem("move") || JSON.stringify(defaultLSVal)
     );
     if (parsedLSVal.leftHeld) {
       gameBoard = await moveHorizontal("left", gameBoard);
@@ -337,7 +337,7 @@ export default function Game() {
     } else if (parsedLSVal.upHeld) {
       gameBoard = await rotate(gameBoard);
     }
-    localStorage.setItem("move", JSON.stringify(defaultLSVal));
+    sessionStorage.setItem("move", JSON.stringify(defaultLSVal));
     const gameObj = {
       gameBoard: gameBoard,
       gameNextMino: gameNextMino,
