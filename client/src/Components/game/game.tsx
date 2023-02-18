@@ -423,15 +423,148 @@ export default function Game() {
   const rotate = async (
     gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
   ) => {
-    if (await canRotate(gameBoard)) {
+    const activePiece = gameBoard
+      .map((row) => row.filter((cell) => cell.isPlayed))
+      .flat()[0].value; // Updated to get first cell instead of second
+    if (activePiece === "O") return gameBoard;
+    const newGameBoard = gameBoard.map((row) =>
+      row.map((cell) => ({ ...cell }))
+    );
+    if (await canRotate(newGameBoard)) {
+      const tetrominoPosition = findTetrominoPosition(newGameBoard);
+      const middleIndex = Math.floor(tetrominoPosition.length / 2);
+      const middleCell = tetrominoPosition[middleIndex];
+      const rotatedTetromino: Array<{
+        row: number;
+        col: number;
+        value: string;
+        isPlayed: boolean;
+      }> = [];
+      const reversedTetrominoPosition = [...tetrominoPosition].reverse();
+      reversedTetrominoPosition.forEach((cell) => {
+        const rowDiff = cell.row - middleCell.row;
+        const colDiff = cell.col - middleCell.col;
+        const newRow = middleCell.row - colDiff;
+        const newCol = middleCell.col + rowDiff;
+        if (
+          newRow >= 0 &&
+          newRow < newGameBoard.length &&
+          newCol >= 0 &&
+          newCol < newGameBoard[0].length
+        ) {
+          rotatedTetromino.push({
+            row: newRow,
+            col: newCol,
+            value: cell.value,
+            isPlayed: cell.isPlayed,
+          });
+        }
+      });
+      if (rotatedTetromino.length === tetrominoPosition.length) {
+        tetrominoPosition.forEach((cell) => {
+          newGameBoard[cell.row][cell.col].value = "";
+          newGameBoard[cell.row][cell.col].isPlayed = false;
+        });
+        rotatedTetromino.forEach((cell) => {
+          newGameBoard[cell.row][cell.col].value = cell.value;
+          newGameBoard[cell.row][cell.col].isPlayed = cell.isPlayed;
+        });
+      }
     }
-    return gameBoard;
+    return newGameBoard;
   };
 
   const canRotate = async (
     gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
   ) => {
+    const newGameBoard = gameBoard.map((row) =>
+      row.map((cell) => ({ ...cell }))
+    );
+    const tetrominoPosition = findTetrominoPosition(newGameBoard);
+    const middleIndex = Math.floor(tetrominoPosition.length / 2);
+    const middleCell = tetrominoPosition[middleIndex];
+    const rotatedTetromino: Array<{
+      row: number;
+      col: number;
+      value: string;
+      isPlayed: boolean;
+    }> = [];
+    const reversedTetrominoPosition = [...tetrominoPosition].reverse();
+    let outOfBounds = false;
+    let cellsToCheck: Array<{ row: number; col: number }> = [];
+    reversedTetrominoPosition.forEach((cell) => {
+      const rowDiff = cell.row - middleCell.row;
+      const colDiff = cell.col - middleCell.col;
+      const newRow = middleCell.row + colDiff;
+      const newCol = middleCell.col - rowDiff;
+      if (
+        newRow < 0 ||
+        newRow >= gameBoard.length ||
+        newCol < 0 ||
+        newCol >= gameBoard[0].length
+      ) {
+        outOfBounds = true;
+      } else {
+        cellsToCheck.push({ row: newRow, col: newCol });
+      }
+      rotatedTetromino.push({
+        row: newRow,
+        col: newCol,
+        value: cell.value,
+        isPlayed: cell.isPlayed,
+      });
+    });
+    if (outOfBounds) {
+      return false;
+    }
+    let overlap = false;
+    cellsToCheck.forEach((cell) => {
+      if (
+        newGameBoard[cell.row][cell.col].value !== "" &&
+        !newGameBoard[cell.row][cell.col].isPlayed
+      ) {
+        overlap = true;
+      }
+    });
+    if (overlap) {
+      return false;
+    }
+    const tetrominoCells = tetrominoPosition.length;
+    for (let i = 0; i < tetrominoCells; i++) {
+      const currentCell = tetrominoPosition[i];
+      const newCell = rotatedTetromino[i];
+      if (currentCell.row !== newCell.row || currentCell.col !== newCell.col) {
+        newGameBoard[currentCell.row][currentCell.col].value = "";
+        newGameBoard[currentCell.row][currentCell.col].isPlayed = false;
+        newGameBoard[newCell.row][newCell.col].value = currentCell.value;
+        newGameBoard[newCell.row][newCell.col].isPlayed = true;
+      }
+    }
     return true;
+  };
+
+  const findTetrominoPosition = (
+    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
+  ) => {
+    const tetrominoPosition: Array<{
+      row: number;
+      col: number;
+      value: string;
+      isPlayed: boolean;
+    }> = [];
+    gameBoard.forEach((row, rowIndex) => {
+      row.forEach((cell, colIndex) => {
+        if (cell.isPlayed) {
+          tetrominoPosition.push({
+            row: rowIndex,
+            col: colIndex,
+            value: cell.value,
+            isPlayed: cell.isPlayed,
+          });
+        }
+      });
+    });
+    return tetrominoPosition;
   };
 
   const moveDown = async (
@@ -539,6 +672,27 @@ export default function Game() {
   useEffect(() => {
     setColors().then(startGame);
   }, [gameOver]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "j") {
+        pulseKey("ArrowLeft");
+      }
+      if (e.key === "ArrowRight" || e.key === "d" || e.key === "l") {
+        pulseKey("ArrowRight");
+      }
+      if (e.key === "ArrowDown" || e.key === "s" || e.key === "k") {
+        pulseKey("ArrowDown");
+      }
+      if (e.key === "ArrowUp" || e.key === "w" || e.key === "i") {
+        pulseKey("ArrowUp");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   return (
     <div className="flex flex-col mt-5">
