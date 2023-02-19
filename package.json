@@ -7,11 +7,10 @@
         "node": "16.17.1"
     },
     "scripts": {
-        "start": "cd server && npm start",
-        "develop": "concurrently \"cd server && npm run watch\" \"cd client && npm run dev\"",
-        "install": "cd server && npm i && cd ../client && npm i",
-        "build": "cd client && npm run build"
-    },
+        "dev": "concurrently --kill-others \"npm run server\" \"npm run client\"",
+        "build": "cd client && npm run build",
+        "start": "cd server && npm run start"
+      },
     "keywords": [
         "game",
         "mongodb",
