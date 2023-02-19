@@ -443,21 +443,21 @@ export default function Game() {
       value: string;
       isPlayed: boolean;
     }> = [];
-    const reversedTetrominoPosition = [...tetrominoPosition].reverse();
     let outOfBounds = false;
     let overlap = false;
     let cellsToCheck: Array<{ row: number; col: number }> = [];
-    reversedTetrominoPosition.forEach((cell) => {
+    tetrominoPosition.forEach((cell) => {
       const rowDiff = cell.row - middleCell.row;
       const colDiff = cell.col - middleCell.col;
       let newRow = middleCell.row - colDiff;
       let newCol = middleCell.col + rowDiff;
-      if (shiftCell && currentTetromino === "S") {
+      if (
+        (shiftCell && currentTetromino === "S") ||
+        (rotationNum === 1 && currentTetromino === "J")
+      ) {
         newCol += 1;
       } else if (shiftCell && currentTetromino === "T") {
         newCol -= 1;
-      } else if (rotationNum === 1 && currentTetromino === "J") {
-        newCol += 1;
       }
       if (
         newRow < 0 ||
