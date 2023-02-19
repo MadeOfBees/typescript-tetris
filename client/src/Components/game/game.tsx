@@ -216,7 +216,7 @@ export default function Game() {
   };
 
   const newMino = async () => {
-    const mino = tetrominoes[Math.floor(Math.random() * tetrominoes.length)];
+    const mino = tetrominoes[0];
     return mino;
   };
 
@@ -301,15 +301,17 @@ export default function Game() {
       gameNextMino = await newMino();
     } else {
       if (fallCount === 0) {
-        const newGameObj = await minoFall(gameBoard, gameNextMino);
+        const newGameObj = await minoFall(gameBoard, gameNextMino, currentScore);
         gameBoard = newGameObj.gameBoard;
         gameNextMino = newGameObj.gameNextMino;
+        currentScore = newGameObj.currentScore;
         fallCount++;
       } else {
         fallCount++;
-        const newGameObj = await handlePlayerMove(gameBoard, gameNextMino);
+        const newGameObj = await handlePlayerMove(gameBoard, gameNextMino, currentScore);
         gameBoard = newGameObj.gameBoard;
         gameNextMino = newGameObj.gameNextMino;
+        currentScore = newGameObj.currentScore;
         if (fallCount === gameSpeed) fallCount = 0;
       }
     }
@@ -322,7 +324,8 @@ export default function Game() {
 
   const handlePlayerMove = async (
     gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>,
-    gameNextMino: string[][]
+    gameNextMino: string[][],
+    currentScore: number
   ) => {
     const parsedLSVal = JSON.parse(
       sessionStorage.getItem("move") || JSON.stringify(defaultLSVal)
@@ -332,9 +335,10 @@ export default function Game() {
     } else if (parsedLSVal.rightHeld) {
       gameBoard = await moveHorizontal("right", gameBoard);
     } else if (parsedLSVal.downHeld) {
-      const gameObj = await moveDown(gameBoard, gameNextMino);
+      const gameObj = await minoFall(gameBoard, gameNextMino, currentScore);
       gameBoard = gameObj.gameBoard;
       gameNextMino = gameObj.gameNextMino;
+      currentScore = gameObj.currentScore;
     } else if (parsedLSVal.upHeld) {
       gameBoard = await rotate(gameBoard);
     }
@@ -342,6 +346,7 @@ export default function Game() {
     const gameObj = {
       gameBoard: gameBoard,
       gameNextMino: gameNextMino,
+      currentScore: currentScore,
     };
     return gameObj;
   };
@@ -530,14 +535,6 @@ export default function Game() {
     return tetrominoPosition;
   };
 
-  const moveDown = async (
-    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>,
-    gameNextMino: string[][]
-  ) => {
-    const newGameObj = await minoFall(gameBoard, gameNextMino);
-    return newGameObj;
-  };
-
   const spawnMino = async (
     gameNextMino: string[][],
     gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
@@ -576,7 +573,8 @@ export default function Game() {
 
   const minoFall = async (
     gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>,
-    gameNextMino: string[][]
+    gameNextMino: string[][],
+    gameScore: number
   ) => {
     fallCount = 1;
     let canFall = true;
@@ -604,8 +602,11 @@ export default function Game() {
           }
         }
       }
-      gameBoard = await spawnMino(gameNextMino, gameBoard);
+      const clearedBoard = await checkForLines(gameBoard, gameScore);
+      const newGameBoard = await spawnMino(gameNextMino, clearedBoard.gameBoard);
       gameNextMino = await newMino();
+      gameScore = clearedBoard.gameScore;
+      gameBoard = newGameBoard
     } else {
       for (let i = gameBoard.length - 1; i >= 0; i--) {
         for (let j = 0; j < gameBoard[i].length; j++) {
@@ -624,13 +625,73 @@ export default function Game() {
         }
       }
     }
-
     const gameObj = {
       gameBoard: gameBoard,
       gameNextMino: gameNextMino,
+      currentScore: gameScore,
     };
     return gameObj;
   };
+
+  const checkForLines = async (
+    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>,
+    gameScore: number
+  ) => {
+    let newScore = gameScore;
+    let linesCleared = 0;
+    for (let i = 0; i < gameBoard.length; i++) {
+      let lineClear = true;
+      for (let j = 0; j < gameBoard[i].length; j++) {
+        if (gameBoard[i][j].value === "") {
+          lineClear = false;
+          break;
+        }
+      }
+      if (lineClear) {
+        linesCleared++;
+        for (let j = 0; j < gameBoard[i].length; j++) {
+          gameBoard[i][j].value = "";
+        }
+        for (let k = i - 1; k >= 0; k--) {
+          for (let j = 0; j < gameBoard[k].length; j++) {
+            gameBoard[k + 1][j].value = gameBoard[k][j].value;
+            gameBoard[k][j].value = "";
+          }
+        }
+      }
+    }
+    if (linesCleared > 0) {
+      switch (linesCleared) {
+        case 1:
+          newScore += 100;
+          break;
+        case 2:
+          newScore += 300;
+          break;
+        case 3:
+          newScore += 500;
+          break;
+        case 4:
+          newScore += 800;
+          break;
+        default:
+          break;
+      }
+      for (let i = 0; i < gameBoard.length; i++) {
+        for (let j = 0; j < gameBoard[i].length; j++) {
+          if (gameBoard[i][j].value !== "") {
+            gameBoard[i][j].isPlayed = true;
+          }
+        }
+      }
+    }
+    const gameObj = {
+      gameBoard: gameBoard,
+      gameScore: newScore,
+    };
+    return gameObj;
+  };
+  
 
   useEffect(() => {
     setColors().then(startGame);
