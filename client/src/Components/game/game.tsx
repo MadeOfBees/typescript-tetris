@@ -51,6 +51,7 @@ export default function Game() {
       Array.from({ length: 10 }, () => ({ value: "", isPlayed: false }))
     )
   );
+  let rotationNum: number = 1;
   const [displayedMino, setDisplayedMino] = useState<
     Array<Array<{ value: string; isPlayed: boolean }>>
   >(
@@ -423,15 +424,110 @@ export default function Game() {
   const rotate = async (
     gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
   ) => {
-    if (await canRotate(gameBoard)) {
+    const shiftCell: boolean = rotationNum % 2 === 1;
+    const currentTetromino = gameBoard
+      .filter((row) => row.some((cell) => cell.isPlayed))[0]
+      .filter((cell) => cell.isPlayed)[0].value;
+    if (currentTetromino === "O") {
+      return gameBoard;
     }
-    return gameBoard;
+    const newGameBoard = gameBoard.map((row) =>
+      row.map((cell) => ({ ...cell }))
+    );
+    const tetrominoPosition = findTetrominoPosition(newGameBoard);
+    const middleIndex = Math.floor(tetrominoPosition.length / 2);
+    const middleCell = tetrominoPosition[middleIndex];
+    const rotatedTetromino: Array<{
+      row: number;
+      col: number;
+      value: string;
+      isPlayed: boolean;
+    }> = [];
+    let outOfBounds = false;
+    let overlap = false;
+    let cellsToCheck: Array<{ row: number; col: number }> = [];
+    tetrominoPosition.forEach((cell) => {
+      const rowDiff = cell.row - middleCell.row;
+      const colDiff = cell.col - middleCell.col;
+      let newRow = middleCell.row - colDiff;
+      let newCol = middleCell.col + rowDiff;
+      if (
+        (shiftCell && currentTetromino === "S") ||
+        (rotationNum === 1 && currentTetromino === "J")
+      ) {
+        newCol += 1;
+      } else if (shiftCell && currentTetromino === "T") {
+        newCol -= 1;
+      }
+      if (
+        newRow < 0 ||
+        newRow >= gameBoard.length ||
+        newCol < 0 ||
+        newCol >= gameBoard[0].length
+      ) {
+        outOfBounds = true;
+      } else {
+        cellsToCheck.push({ row: newRow, col: newCol });
+      }
+      rotatedTetromino.push({
+        row: newRow,
+        col: newCol,
+        value: cell.value,
+        isPlayed: cell.isPlayed,
+      });
+    });
+    if (outOfBounds) {
+      return gameBoard;
+    }
+    cellsToCheck.forEach((cell) => {
+      if (
+        newGameBoard[cell.row][cell.col].value !== "" &&
+        !newGameBoard[cell.row][cell.col].isPlayed
+      ) {
+        overlap = true;
+      }
+    });
+    if (overlap) {
+      return gameBoard;
+    }
+    tetrominoPosition.forEach((cell) => {
+      newGameBoard[cell.row][cell.col].value = "";
+      newGameBoard[cell.row][cell.col].isPlayed = false;
+    });
+    rotatedTetromino.forEach((cell) => {
+      newGameBoard[cell.row][cell.col].value = cell.value;
+      newGameBoard[cell.row][cell.col].isPlayed = cell.isPlayed;
+    });
+    if (rotationNum === 4) {
+      rotationNum = 1;
+    } else {
+      rotationNum += 1;
+    }
+    return newGameBoard;
   };
 
-  const canRotate = async (
+  const findTetrominoPosition = (
     gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
   ) => {
-    return true;
+    const tetrominoPosition: Array<{
+      row: number;
+      col: number;
+      value: string;
+      isPlayed: boolean;
+    }> = [];
+    gameBoard.forEach((row, rowIndex) => {
+      row.forEach((cell, colIndex) => {
+        if (cell.isPlayed) {
+          tetrominoPosition.push({
+            row: rowIndex,
+            col: colIndex,
+            value: cell.value,
+            isPlayed: cell.isPlayed,
+          });
+        }
+      });
+    });
+    return tetrominoPosition;
   };
 
   const moveDown = async (
@@ -539,6 +635,27 @@ export default function Game() {
   useEffect(() => {
     setColors().then(startGame);
   }, [gameOver]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "j") {
+        pulseKey("ArrowLeft");
+      }
+      if (e.key === "ArrowRight" || e.key === "d" || e.key === "l") {
+        pulseKey("ArrowRight");
+      }
+      if (e.key === "ArrowDown" || e.key === "s" || e.key === "k") {
+        pulseKey("ArrowDown");
+      }
+      if (e.key === "ArrowUp" || e.key === "w" || e.key === "i") {
+        pulseKey("ArrowUp");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   return (
     <div className="flex flex-col mt-5">
