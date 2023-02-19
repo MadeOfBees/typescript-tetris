@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/router";
+import config from "../../../apiConfig";
 
 export default function Game() {
   const tetrominoes = [
@@ -175,6 +175,54 @@ export default function Game() {
     setDisplayedMino(newTetromino);
   };
 
+  const idTheUser = async () => {
+    if (!localStorage.getItem("userID")) {
+      const fetchUserID = async () => {
+        const response = await fetch(`${config.apiUrl}/api/users/new/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const data = await response.json();
+        localStorage.setItem("userID", data.newUser._id);
+        return Promise.resolve(data.newUser._id);
+      };
+      return fetchUserID();
+    } else {
+      const userID = localStorage.getItem("userID");
+      const fetchUserID = async () => {
+        const response = await fetch(
+          `${config.apiUrl}/api/users/isValid/${userID}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const data = await response.json();
+        if (data.valid) {
+          return Promise.resolve(userID);
+        } else {
+          const response = await fetch(
+            `${config.apiUrl}/api/users/api/users/new/`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          const data = await response.json();
+          localStorage.setItem("userID", data.newUser._id);
+          return Promise.resolve(data.newUser._id);
+        }
+      };
+      return fetchUserID();
+    }
+  };
+
   const startNewGame = () => {
     setBoard(
       Array.from({ length: 20 }, () =>
@@ -216,7 +264,7 @@ export default function Game() {
   };
 
   const newMino = async () => {
-    const mino = tetrominoes[0];
+    const mino = tetrominoes[Math.floor(Math.random() * tetrominoes.length)];
     return mino;
   };
 
@@ -301,14 +349,22 @@ export default function Game() {
       gameNextMino = await newMino();
     } else {
       if (fallCount === 0) {
-        const newGameObj = await minoFall(gameBoard, gameNextMino, currentScore);
+        const newGameObj = await minoFall(
+          gameBoard,
+          gameNextMino,
+          currentScore
+        );
         gameBoard = newGameObj.gameBoard;
         gameNextMino = newGameObj.gameNextMino;
         currentScore = newGameObj.currentScore;
         fallCount++;
       } else {
         fallCount++;
-        const newGameObj = await handlePlayerMove(gameBoard, gameNextMino, currentScore);
+        const newGameObj = await handlePlayerMove(
+          gameBoard,
+          gameNextMino,
+          currentScore
+        );
         gameBoard = newGameObj.gameBoard;
         gameNextMino = newGameObj.gameNextMino;
         currentScore = newGameObj.currentScore;
@@ -603,10 +659,13 @@ export default function Game() {
         }
       }
       const clearedBoard = await checkForLines(gameBoard, gameScore);
-      const newGameBoard = await spawnMino(gameNextMino, clearedBoard.gameBoard);
+      const newGameBoard = await spawnMino(
+        gameNextMino,
+        clearedBoard.gameBoard
+      );
       gameNextMino = await newMino();
       gameScore = clearedBoard.gameScore;
-      gameBoard = newGameBoard
+      gameBoard = newGameBoard;
     } else {
       for (let i = gameBoard.length - 1; i >= 0; i--) {
         for (let j = 0; j < gameBoard[i].length; j++) {
@@ -691,7 +750,6 @@ export default function Game() {
     };
     return gameObj;
   };
-  
 
   useEffect(() => {
     setColors().then(startGame);
@@ -701,6 +759,7 @@ export default function Game() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft" || e.key === "a" || e.key === "j") {
         pulseKey("ArrowLeft");
+        idTheUser();
       }
       if (e.key === "ArrowRight" || e.key === "d" || e.key === "l") {
         pulseKey("ArrowRight");
