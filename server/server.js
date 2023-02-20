@@ -17,7 +17,7 @@ app.prepare().then(() => {
   server.use(express.json());
   server.use(cors());
   if (process.env.NODE_ENV === 'production') {
-    server.use(express.static(path.join(__dirname, '../client/.next')));
+    server.use(express.static(path.join(__dirname, '../client/.next/static')));
   }
   server.use(routes);
   server.get('*', (req, res) => {
