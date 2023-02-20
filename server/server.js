@@ -12,9 +12,9 @@ app.use(cors());
 app.use(express.json());
 
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/.next/static')));
+  app.use(express.static(path.join(__dirname, '../client/.next')));
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/.next/)'));
+    res.sendFile(path.join(__dirname, '../client/.next/server/pages/index.html'));
   });
 }
 
