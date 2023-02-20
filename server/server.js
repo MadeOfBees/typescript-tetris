@@ -20,7 +20,6 @@ if (process.env.NODE_ENV === 'production') {
 
 app.use(routes);
 
-
 db.once('open', () => {
   app.listen(PORT, () => console.log(`Connected on port: ${PORT}`));
 });
