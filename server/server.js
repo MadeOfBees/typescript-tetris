@@ -12,9 +12,11 @@ app.use(cors());
 app.use(express.json());
 
 if (process.env.NODE_ENV === 'production') {
+  // use next.js to serve up production assets
   app.use(express.static(path.join(__dirname, '../client/.next')));
+  // use next.js to serve up the index.html file if it doesn't recognize the route
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/.next/server/pages/index.html'));
+    return handle(req, res);
   });
 }
 
