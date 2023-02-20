@@ -1,27 +1,29 @@
 const express = require('express');
 const next = require('next');
+const dev = process.env.NODE_ENV !== 'production';
+const app = next({ dev });
+const handle = app.getRequestHandler();
+const express = require('express');
 const path = require('path');
 const db = require('./config/connection');
 const routes = require('./routes');
 const cors = require('cors');
 require('dotenv').config();
-const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
-app.use(express.json());
-
-if (process.env.NODE_ENV === 'production') {
-  // use next.js to serve up production assets
-  app.use(express.static(path.join(__dirname, '../client/.next')));
-  // use next.js to serve up the index.html file if it doesn't recognize the route
-  app.get('*', (req, res) => {
+app.prepare().then(() => {
+  const server = express();
+  server.use(express.urlencoded({ extended: false }));
+  server.use(express.json());
+  server.use(cors());
+  if (process.env.NODE_ENV === 'production') {
+    server.use(express.static(path.join(__dirname, '../client/.next')));
+  }
+  server.use(routes);
+  server.get('*', (req, res) => {
     return handle(req, res);
   });
-}
-
-app.use(routes);
-
-db.once('open', () => {
-  app.listen(PORT, () => console.log(`Connected on port: ${PORT}`));
+  db.once('open', () => {
+    server.listen(PORT, () => console.log(`🌍 Now listening on localhost:${PORT}`));
+  });
 });
