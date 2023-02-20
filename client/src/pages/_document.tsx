@@ -1,6 +1,4 @@
 import { Html, Head, Main, NextScript } from 'next/document'
-import ContactDetails from '@/Components/contactDetails'
-
 
 export default function Document() {
   return (
