@@ -4,10 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "NODE_ENV=production next build",
+    "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "postbuild": "next build"
+    "lint": "next lint"
   },
   "dependencies": {
     "@next/font": "13.1.6",
