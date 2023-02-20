@@ -6,20 +6,27 @@ const routes = require('./routes');
 const cors = require('cors');
 require('dotenv').config();
 const app = express();
+const dev = process.env.NODE_ENV !== 'production';
+const nextApp = next({ dev });
+const handle = nextApp.getRequestHandler();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
 
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/.next')));
+nextApp.prepare().then(() => {
+  app.use(routes);
+
+  if (!dev) {
+    app.use(express.static(path.join(__dirname, '../client/.next')));
+  }
+
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/.next', 'server', 'pages', 'index.html'));
+    return handle(req, res);
   });
-}
 
-app.use(routes);
-
-db.once('open', () => {
-  app.listen(PORT, () => console.log(`Connected on port: ${PORT}`));
+  db.once('open', () => {
+    app.listen(PORT, () => console.log(`Connected on port: ${PORT}`));
+  });
 });
+
