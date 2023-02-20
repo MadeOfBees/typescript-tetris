@@ -16,11 +16,11 @@ const nextApp = next({ dev });
 const handle = nextApp.getRequestHandler();
 
 nextApp.prepare().then(() => {
-  app.get('/_next/*', (req, res) => {
+  app.get('../client/.next/*', (req, res) => {
     handle(req, res);
   });
 
-  app.get('/static/*', (req, res) => {
+  app.get('../client/static/*', (req, res) => {
     handle(req, res);
   });
 
