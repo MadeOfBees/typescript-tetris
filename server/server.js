@@ -11,24 +11,15 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-const dev = process.env.NODE_ENV !== 'production';
-const nextApp = next({ dev });
-const handle = nextApp.getRequestHandler();
-
-nextApp.prepare().then(() => {
-  app.get('../client/.next/*', (req, res) => {
-    handle(req, res);
-  });
-
-  app.get('../client/static/*', (req, res) => {
-    handle(req, res);
-  });
-
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../client/.next')));
   app.get('*', (req, res) => {
-    return handle(req, res);
+    res.sendFile(path.join(__dirname, '../client/.next/server/pages/index.html'));
   });
+}
 
-  db.once('open', () => {
-    app.listen(PORT, () => console.log(`Connected on port: ${PORT}`));
-  });
+app.use(routes);
+
+db.once('open', () => {
+  app.listen(PORT, () => console.log(`Connected on port: ${PORT}`));
 });
