@@ -3,6 +3,7 @@ import { newUser, allUsers, userbyID, deleteByID, deleteAll, isValidUser } from 
 export default function handler(req, res) {
   switch (req.method) {
     case 'POST':
+      console.log("POST")
       return newUser(req, res);
     case 'GET':
       if (req.query.id) {

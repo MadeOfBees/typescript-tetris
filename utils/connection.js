@@ -1,12 +1,5 @@
 const mongoose = require('mongoose');
 
-mongoose.connect(
-  process.env.MONGODB_URI || 'mongodb://localhost/tetris',
-  {
-    useFindAndModify: false,
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  }
-);
+const connectDB = async () => mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/tetris', { useNewUrlParser: true, });
 
-module.exports = mongoose.connection;
+module.exports = connectDB;
