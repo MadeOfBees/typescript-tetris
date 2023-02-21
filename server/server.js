@@ -7,20 +7,34 @@ const cors = require('cors');
 require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3001;
+const nextFolder = path.join(__dirname, '../client/.next')
+const nextStaticChunksPages = "/static/chunks/pages"
+const nextStaticMedia = "/static/media"
+const nextStaticCSS = "/static/css"
+const nextServerPages = "/_next/server/pages"
+const nextServerChunks = "/_next/server/chunks"
+const nextCache = "/_next/cache"
+const dev = process.env.NODE_ENV !== 'production';
+const nextApp = next({ dev });
 
-app.use(cors());
-app.use(express.json());
+const handle = nextApp.getRequestHandler();
 
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/.next')));
+nextApp.prepare().then(() => {
+  app.use(express.urlencoded({ extended: false }));
+  app.use(express.json());
+  app.use(cors());
+  app.use(routes);
+  app.use('/static/chunks/pages', express.static(path.join(nextFolder, nextStaticChunksPages)));
+  app.use('/static/media', express.static(path.join(nextFolder, nextStaticMedia)));
+  app.use('/static/css', express.static(path.join(nextFolder, nextStaticCSS)));
+  app.use('/_next/server/pages', express.static(path.join(nextFolder, nextServerPages)));
+  app.use('/_next/server/chunks', express.static(path.join(nextFolder, nextServerChunks)));
+  app.use('/_next/cache', express.static(path.join(nextFolder, nextCache)));
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../.next', 'server', 'pages'));
+    return handle(req, res);
   });
-  
+  db.once('open', () => {
+    app.listen(PORT, () => console.log(`🌍 Now listening on localhost:${PORT}`));
+  });
 }
-
-app.use(routes);
-
-db.once('open', () => {
-  app.listen(PORT, () => console.log(`Connected on port: ${PORT}`));
-});
+);
