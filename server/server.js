@@ -9,20 +9,20 @@ const routes = require('./routes');
 const cors = require('cors');
 require('dotenv').config();
 const PORT = process.env.PORT || 3001;
+const nextFolder = "../client/.next";
 
 app.prepare().then(() => {
   const server = express();
-  server.use(express.urlencoded({ extended: false }));
+  server.use(express.urlencoded({ extended: true }));
   server.use(express.json());
   server.use(cors());
-  if (process.env.NODE_ENV === 'production') {
-    server.use(express.static(path.join(__dirname, '../client/.next/static')));
-  }
   server.use(routes);
+  server.use(express.static(path.join(__dirname, nextFolder)));
   server.get('*', (req, res) => {
     return handle(req, res);
   });
-  db.once('open', () => {
-    server.listen(PORT, () => console.log(`🌍 Now listening on localhost:${PORT}`));
+  server.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
   });
 });
+
