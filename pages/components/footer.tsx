@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function Footer() {
+export default function Footer(): JSX.Element {
   return (
     <footer className="fixed bottom-0 w-full">
       <div className="footer footer-center p-4 bg-base-300 text-base-content">

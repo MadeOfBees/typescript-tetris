@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import config from "../../../apiConfig";
 
-export default function Game() {
+export default function Game(): JSX.Element {
   const tetrominoes = [
     [
       ["", "I", "", ""],
@@ -324,7 +324,7 @@ export default function Game() {
           gameObj.currentScore
         );
       }
-    }, 50);
+    }, 100);
     updateB;
   };
 

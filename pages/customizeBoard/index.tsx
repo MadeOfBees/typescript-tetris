@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 
-export default function customizeBoard() {
+export default function customizeBoard(): JSX.Element {
   const [board, setBoard] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {

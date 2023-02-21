@@ -1,7 +1,7 @@
 import { useState } from "react";
-import ContactDetails from "./contactDetails";
+import ContactDetails from "./contactDetails"
 
-export default function Modal() {
+export default function Modal(): JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleModal = () => setIsOpen(!isOpen);

@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 
-export default function Navbar() {
+export default function Navbar(): JSX.Element {
   return (
     <nav className="navbar bg-base-100">
       <div className="navbar-start">

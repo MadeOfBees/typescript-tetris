@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function ContactDetails() {
+export default function ContactDetails(): JSX.Element {
   return (
     <div>
       <h3 className="font-bold text-lg">Contact me:</h3>

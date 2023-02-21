@@ -3,7 +3,7 @@ import Navbar from "./../components/navbar";
 import Footer from "./../components/footer";
 import config from "../../apiConfig";
 
-export default function leaderboard() {
+export default function leaderboard(): JSX.Element {
   type Score = {
     id: number;
     score: number;

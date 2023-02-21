@@ -1,11 +1,10 @@
 import Head from "next/head";
 import Navbar from "./components/navbar";
 import Modal from "./components/modal";
-import Footer from "./components/footer"
+import Footer from "./components/footer";
 import Game from "./components/game/game";
 
-
-export default function Home() {
+export default function Home(): JSX.Element {
   return (
     <>
       <Modal />
