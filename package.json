@@ -1,32 +1,38 @@
 {
-    "name": "typescript-tetris",
-    "version": "0",
-    "description": "A Typescript/NextJS/Tailwind port of the classic game Tetris with a scoreboard system using MongoDB, Express and Node JS.",
-    "main": "server/server.js",
-    "engines": {
-        "node": "16.17.1"
-    },
-    "scripts": {
-        "start": "node server/server.js",
-        "develop": "concurrently \"cd server && npm run watch\" \"cd client && npm run dev\"",
-        "install": "cd server && npm i && cd ../client && npm i",
-        "build": "cd client && npm run build"
-    },
-    "keywords": [
-        "game",
-        "mongodb",
-        "react",
-        "node",
-        "typescript",
-        "tailwind",
-        "nextjs",
-        "puzzle",
-        "express",
-        "tetris"
-    ],
-    "author": "MadeOfBees",
-    "license": "ISC",
-    "devDependencies": {
-        "concurrently": "^5.3.0"
-    }
+  "name": "typescript-tetris",
+  "description": "A simple tetris game built with Next.js and Typescript with a custom server.",
+  "author": "MadeOfBees",
+  "license": "MIT",
+  "version": "0.2.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@next/font": "13.1.6",
+    "@types/node": "18.11.18",
+    "@types/react": "18.0.27",
+    "@types/react-dom": "18.0.10",
+    "daisyui": "^2.50.0",
+    "eslint": "8.33.0",
+    "eslint-config-next": "13.1.6",
+    "next": "13.1.6",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "typescript": "4.9.5",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.17.1",
+    "mongoose": "^5.9.10",
+    "nodemon": "^2.0.20"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.13",
+    "postcss": "^8.4.21",
+    "postcss-import": "^15.1.0",
+    "tailwindcss": "^3.2.4",
+    "concurrently": "^5.3.0"
+  }
 }
