@@ -1,14 +1,20 @@
-import { useState } from 'react'
-import ContactDetails from '@/Components/contactDetails'
+import { useState } from "react";
+import ContactDetails from "@/Components/contactDetails";
 
 export default function Modal() {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
-  const toggleModal = () => setIsOpen(!isOpen)
+  const toggleModal = () => setIsOpen(!isOpen);
 
   return (
     <>
-      <input type="checkbox" id="contactModal" className="modal-toggle" checked={isOpen} onChange={toggleModal} />
+      <input
+        type="checkbox"
+        id="contactModal"
+        className="modal-toggle"
+        checked={isOpen}
+        onChange={toggleModal}
+      />
       <label htmlFor="contactModal" className="modal cursor-pointer">
         <div className="modal-box relative">
           <ContactDetails />
@@ -18,5 +24,5 @@ export default function Modal() {
         </div>
       </label>
     </>
-  )
+  );
 }
