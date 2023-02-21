@@ -1,11 +1,19 @@
-import { newUser, allUsers, userbyID, deleteByID, deleteAll, isValidUser } from './controllers/users';
+import { Request, Response } from "express";
+import {
+  newUser,
+  allUsers,
+  userbyID,
+  deleteByID,
+  deleteAll,
+  isValidUser,
+} from "./controllers/users";
 
-export default function handler(req, res) {
+export default function handler(req: Request, res: Response) {
   switch (req.method) {
-    case 'POST':
-      console.log("POST")
+    case "POST":
+      console.log("POST");
       return newUser(req, res);
-    case 'GET':
+    case "GET":
       if (req.query.id) {
         return userbyID(req, res);
       } else if (req.query.isValid) {
@@ -13,7 +21,7 @@ export default function handler(req, res) {
       } else {
         return allUsers(req, res);
       }
-    case 'DELETE':
+    case "DELETE":
       if (req.query.id) {
         return deleteByID(req, res);
       } else {
