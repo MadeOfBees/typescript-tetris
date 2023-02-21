@@ -1,5 +1,4 @@
-import "../index"
-import { newUser, allUsers, userbyID, deleteByID, deleteAll, isValidUser } from '../controllers/user-controller.js';
+import { newUser, allUsers, userbyID, deleteByID, deleteAll, isValidUser } from './controllers/users';
 
 export default function handler(req, res) {
   switch (req.method) {

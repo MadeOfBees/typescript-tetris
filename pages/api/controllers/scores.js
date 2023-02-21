@@ -1,4 +1,4 @@
-import Scores from '../../../models/scores'
+import {Scores} from '../../../models/scores';
 
 export async function newScore(req, res) {
     try {

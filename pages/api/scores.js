@@ -1,5 +1,4 @@
-import "../index"
-import { newScore, scorebyID, allScores, topTenScores, deleteByID, deleteAll, todaysTopTenScores, seeAllUserScores, deleteAllByUser } from '../controllers/scores.js';
+import { newScore, scorebyID, allScores, topTenScores, deleteByID, deleteAll, todaysTopTenScores, seeAllUserScores, deleteAllByUser } from './controllers/scores.js';
 
 export default function handler(req, res) {
     switch (req.method) {
