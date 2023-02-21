@@ -8,7 +8,7 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const nextFolder = path.join(__dirname, '../client');
+const nextFolder = '../client/.next'
 
 const dev = process.env.NODE_ENV !== 'production';
 const nextApp = next({ dev });
@@ -20,9 +20,9 @@ nextApp.prepare().then(() => {
   app.use(cors());
   app.use(routes);
 
-  app.use(express.static(nextFolder));
+  app.use(express.static(path.join(__dirname, nextFolder, '/static')));
 
-  app.get('*', (req, res) => {
+  app.get('*', (req, res) => { 
     return handle(req, res);
   });
 
