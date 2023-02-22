@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "./../components/navbar";
 import Footer from "./../components/footer";
-import config from "../../apiConfig";
+import api from "../../apiConfig";
 
 export default function leaderboard(): JSX.Element {
   type Score = {
@@ -12,28 +12,17 @@ export default function leaderboard(): JSX.Element {
   const [topToday, setTopToday] = useState<Score[]>([]);
   const numOfScores = 10;
 
-  const fetchScores = async (url: string) => {
-    try {
-      const res = await fetch(url);
-      const data = await res.json();
-      return data.scores;
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
-    const fetchTopScores = async () => {
-      const topAllTime = await fetchScores(
-        `${config}/api/scores/top/`
-      );
-      const topToday = await fetchScores(
-        `${config}/api/scores/todaysTop/`
-      );
-      setTopAllTime(topAllTime);
-      setTopToday(topToday);
-    };
-    fetchTopScores();
+    fetch(`${api.config}/api/scores/top/allTime`)
+      .then((res) => res.json())
+      .then((data) => {
+        setTopAllTime(data.scores);
+      });
+    fetch(`${api.config}/api/scores/top/today`)
+      .then((res) => res.json())
+      .then((data) => {
+        setTopToday(data.scores);
+      });
   }, []);
 
   return (
@@ -48,11 +37,14 @@ export default function leaderboard(): JSX.Element {
               </div>
               {Array.from(Array(numOfScores).keys()).map((num) => {
                 return (
-                    <div className="flex justify-center" key={num}>
-                        <h1 className="font-bold">
-                            {num + 1}. {typeOfTop === "Top All Time" ? topAllTime[num]?.score : topToday[num]?.score}
-                        </h1>
-                    </div>
+                  <div className="flex justify-center" key={num}>
+                    <h1 className="font-bold">
+                      {num + 1}.{" "}
+                      {typeOfTop === "Top All Time"
+                        ? topAllTime[num]?.score
+                        : topToday[num]?.score}
+                    </h1>
+                  </div>
                 );
               })}
             </div>

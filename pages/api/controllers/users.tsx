@@ -76,15 +76,14 @@ export async function deleteAll(req: Request, res: Response): Promise<void> {
 export async function isValidUser(req: Request, res: Response): Promise<void> {
   try {
     const db = await connectionJS();
+    let output: boolean = false;
     const user = await User.findById(req.query.id);
     db.disconnect();
     if (user) {
-      res.status(200).json({ valid: true });
-    } else {
-      res.status(200).json({ valid: false });
+      output = true;
     }
+    res.status(200).json({ valid: output });
   } catch (error) {
-    res.status(500).json({ message: "Error finding user", error: error as Error });
+    res.status(500).json({ message: "Error retrieving user", error });
   }
 }
-

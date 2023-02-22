@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import config from "../../../apiConfig";
+import api from "../../../apiConfig";
 
 export default function Game(): JSX.Element {
   const tetrominoes = [
@@ -176,51 +176,25 @@ export default function Game(): JSX.Element {
   };
 
   const idTheUser = async () => {
-    if (!localStorage.getItem("userID")) {
-      const fetchUserID = async () => {
-        const response = await fetch(`${config.apiUrl}/api/users/new/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        const data = await response.json();
-        localStorage.setItem("userID", data.newUser._id);
-        return Promise.resolve(data.newUser._id);
-      };
-      return fetchUserID();
-    } else {
-      const userID = localStorage.getItem("userID");
-      const fetchUserID = async () => {
-        const response = await fetch(
-          `${config.apiUrl}/api/users/isValid/${userID}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        const data = await response.json();
-        if (data.valid) {
-          return Promise.resolve(userID);
-        } else {
-          const response = await fetch(
-            `${config.apiUrl}/api/users/api/users/new/`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-            }
-          );
-          const data = await response.json();
-          localStorage.setItem("userID", data.newUser._id);
-          return Promise.resolve(data.newUser._id);
-        }
-      };
-      return fetchUserID();
+    const userID = localStorage.getItem("userID");
+    if (userID) {
+      const response = await fetch(
+        `${api.config}/api/users/isValid/${userID}`,
+        { method: "GET"} 
+      );
+      const data = await response.json();
+      if (data.valid) {
+        return userID;
+      }
     }
+    const response2 = await fetch(`${api.config}/api/users/new/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    const data2 = await response2.json();
+    const newUserID = data2.newUser._id;
+    localStorage.setItem("userID", newUserID);
+    return newUserID;
   };
 
   const startNewGame = () => {
@@ -303,6 +277,7 @@ export default function Game(): JSX.Element {
   };
 
   const startGame = async () => {
+    console.log("current user: ", await idTheUser());
     sessionStorage.setItem("move", JSON.stringify(defaultLSVal));
     let gameObj = {
       gameNextMino: await newMino(),
