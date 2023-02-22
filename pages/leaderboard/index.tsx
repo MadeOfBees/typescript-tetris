@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "./../components/navbar";
 import Footer from "./../components/footer";
-import api from "../../apiConfig";
 
 export default function leaderboard(): JSX.Element {
   type Score = {
@@ -13,12 +12,12 @@ export default function leaderboard(): JSX.Element {
   const numOfScores = 10;
 
   useEffect(() => {
-    fetch(`${api.config}/api/scores/top/allTime`)
+    fetch(`/api/scores/top/allTime`)
       .then((res) => res.json())
       .then((data) => {
         setTopAllTime(data.scores);
       });
-    fetch(`${api.config}/api/scores/top/today`)
+    fetch(`/api/scores/top/today`)
       .then((res) => res.json())
       .then((data) => {
         setTopToday(data.scores);

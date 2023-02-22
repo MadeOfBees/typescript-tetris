@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import api from "../../../apiConfig";
 
 export default function Game(): JSX.Element {
   const tetrominoes = [
@@ -179,7 +178,7 @@ export default function Game(): JSX.Element {
     const userID = localStorage.getItem("userID");
     if (userID) {
       const response = await fetch(
-        `${api.config}/api/users/isValid/${userID}`,
+        `/api/users/isValid/${userID}`,
         { method: "GET"} 
       );
       const data = await response.json();
@@ -187,7 +186,7 @@ export default function Game(): JSX.Element {
         return userID;
       }
     }
-    const response2 = await fetch(`${api.config}/api/users/new/`, {
+    const response2 = await fetch(`/api/users/new/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
     });
