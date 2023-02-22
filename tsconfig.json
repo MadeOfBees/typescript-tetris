@@ -16,6 +16,6 @@
     "incremental": true,
     "baseUrl": "."
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "pages/api/controllers/scores.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "pages/api/controllers/scores.tsx", "postcss.config.js", "pages/api/scores/new.6"],
   "exclude": ["node_modules"]
 }

@@ -84,6 +84,7 @@ export async function isValidUser(req: Request, res: Response): Promise<void> {
       res.status(200).json({ valid: false });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error finding user", error });
+    res.status(500).json({ message: "Error finding user", error: error as Error });
   }
 }
+

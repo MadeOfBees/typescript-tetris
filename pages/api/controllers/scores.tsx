@@ -5,7 +5,7 @@ import connectionJS from "../../../utils/connection";
 export async function newScore(req: Request, res: Response): Promise<void> {
   try {
     const db = await connectionJS();
-    const newScore: IScores = await Scores.create(req.body);
+    const newScore: IScores = await Scores.create(req.body) as IScores;
     res.status(200).json({ message: "Score created successfully", newScore });
     db.disconnect();
   } catch (error) {
@@ -17,7 +17,7 @@ export async function scorebyID(req: Request, res: Response): Promise<void> {
   if (req.body.password === process.env.SPASSWORD) {
     try {
       const db = await connectionJS();
-      const score: IScores | null = await Scores.findById(req.params.id);
+      const score: IScores | null = await Scores.findById(req.query.id);
       res.status(200).json({ message: "Score retrieved successfully", score });
       db.disconnect();
     } catch (error) {
@@ -88,7 +88,7 @@ export async function deleteByID(req: Request, res: Response): Promise<void> {
     try {
       const db = await connectionJS();
       const score: IScores | null = await Scores.findByIdAndDelete(
-        req.params.id
+        req.query.id
       );
       res.status(200).json({ message: "Score deleted successfully", score });
       db.disconnect();
@@ -123,32 +123,13 @@ export async function seeAllUserScores(
   if (req.body.password === process.env.SPASSWORD) {
     try {
       const db = await connectionJS();
-      const scores: IScores[] = await Scores.find({ user: req.params.user });
+      const scores: IScores[] = await Scores.find({ user: req.query.user });
       res
         .status(200)
         .json({ message: "Scores retrieved successfully", scores });
       db.disconnect();
     } catch (error) {
       res.status(500).json({ message: "Error retrieving scores", error });
-    }
-  } else {
-    res.status(401).json({ message: "Unauthorized user, access denied." });
-  }
-}
-
-export async function deleteAllByUser(
-  req: Request,
-  res: Response
-): Promise<void> {
-  if (req.body.password === process.env.SPASSWORD) {
-    try {
-      const db = await connectionJS();
-      const score: IScores | null = await Scores.findByIdAndDelete();
-      await Scores.deleteMany({ user: req.params.user });
-      res.status(200).json({ message: "Scores deleted successfully", score });
-      db.disconnect();
-    } catch (error) {
-      res.status(500).json({ message: "Error deleting scores", error });
     }
   } else {
     res.status(401).json({ message: "Unauthorized user, access denied." });

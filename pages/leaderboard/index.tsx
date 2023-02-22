@@ -25,10 +25,10 @@ export default function leaderboard(): JSX.Element {
   useEffect(() => {
     const fetchTopScores = async () => {
       const topAllTime = await fetchScores(
-        `http://localhost:3001/api/scores/top/`
+        `${config}/api/scores/top/`
       );
       const topToday = await fetchScores(
-        `http://localhost:3001/api/scores/todaysTop/`
+        `${config}/api/scores/todaysTop/`
       );
       setTopAllTime(topAllTime);
       setTopToday(topToday);

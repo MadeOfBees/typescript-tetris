@@ -1,6 +1,6 @@
-import { Schema, Model, model, models, Document } from "mongoose";
+import { Schema, Model, model, models,} from "mongoose";
 
-interface IUser extends Document {
+interface IUser {
   timestamp: Date;
 }
 

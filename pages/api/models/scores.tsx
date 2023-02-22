@@ -1,4 +1,4 @@
-import { Schema, Model, model, Document } from "mongoose";
+import { Schema, Model, model, models,} from "mongoose";
 
 interface IScores {
   score: number;
@@ -6,15 +6,7 @@ interface IScores {
   timestamp?: Date;
 }
 
-interface ScoresAttrs extends IScores {}
-
-interface ScoresDoc extends Document, IScores {}
-
-interface ScoresModel extends Model<ScoresDoc> {
-  createScore(attrs: ScoresAttrs): Promise<ScoresDoc>;
-}
-
-const scoresSchema = new Schema<ScoresDoc, ScoresModel>({
+const scoresSchema: Schema<IScores> = new Schema({
   score: {
     type: Number,
     required: true,
@@ -29,13 +21,7 @@ const scoresSchema = new Schema<ScoresDoc, ScoresModel>({
   },
 });
 
-scoresSchema.statics.createScore = function (attrs: ScoresAttrs) {
-  const { score, userID, timestamp } = attrs;
-  const newScore = new Scores({ score, userID, timestamp });
-  return newScore.save();
-};
-
-const Scores = model<ScoresDoc, ScoresModel>("Scores", scoresSchema);
+const Scores: Model<IScores> = models.Scores || model<IScores>("Scores", scoresSchema);
 
 export { Scores };
 export type { IScores };
