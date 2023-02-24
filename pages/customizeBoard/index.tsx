@@ -25,39 +25,111 @@ export default function customizeBoard(): JSX.Element {
     }
   }, []);
 
+  const tetrominoes = [
+    [
+      ["", "I", "", ""],
+      ["", "I", "", ""],
+      ["", "I", "", ""],
+      ["", "I", "", ""],
+    ],
+    [
+      ["", "J", ""],
+      ["", "J", ""],
+      ["J", "J", ""],
+    ],
+    [
+      ["", "L", ""],
+      ["", "L", ""],
+      ["", "L", "L"],
+    ],
+    [
+      ["O", "O"],
+      ["O", "O"],
+    ],
+    [
+      ["", "S", "S"],
+      ["S", "S", ""],
+    ],
+    [
+      ["T", "T", "T"],
+      ["", "T", ""],
+    ],
+    [
+      ["Z", "Z", ""],
+      ["", "Z", "Z"],
+    ],
+  ];
+
+  const returnMinoSquare = (tetromino: string[][]) => {
+    const newTetromino = Array.from({ length: 4 }, () =>
+      Array.from({ length: 4 }, () => ({ value: "", isPlayed: false }))
+    );
+    const yOffset =
+      tetromino === tetrominoes[0]
+        ? 0
+        : tetromino === tetrominoes[3] ||
+          tetromino === tetrominoes[4] ||
+          tetromino === tetrominoes[5] ||
+          tetromino === tetrominoes[6]
+        ? 2
+        : 1;
+    tetromino.forEach((row, i) =>
+      row.forEach((col, j) => {
+        if (col !== "") {
+          newTetromino[i + yOffset][j].value = col;
+          newTetromino[i + yOffset][j].isPlayed = true;
+        }
+      })
+    );
+    return newTetromino;
+  };
+
+  const returnMinoColor = (tetromino: string[][]) => {
+    const boardColorArray = [
+      board.iColor,
+      board.jColor,
+      board.lColor,
+      board.oColor,
+      board.sColor,
+      board.tColor,
+      board.zColor,
+    ];
+    return tetrominoes.indexOf(tetromino) === 0 ? board.iColor : boardColorArray[tetrominoes.indexOf(tetromino)];
+  };
+
+  const displayMinoBlock = (tetromino: string[][]) => {
+    const minoSquare = returnMinoSquare(tetromino);
+    const minoColor = returnMinoColor(tetromino);
+    const bgColor = board.boardBGColor;
+    return (
+      <div className="flex flex-col">
+        {minoSquare.map((row, i) => (
+          <div className="flex flex-row" key={i}>
+            {row.map((square, j) => (
+              <div
+                className="w-10 h-10 border-2 border-black"
+                style={{
+                  backgroundColor: square.value ? minoColor : bgColor,
+                }}
+                key={j}
+              ></div>
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div>
       <Navbar />
       <div className="flex justify-center mt-5">
-        <div className="flex flex-col">
-          <div className="flex justify-center">
-            <h1 className="text-6xl font-bold">Customize Board</h1>
-          </div>
-          <div className="flex justify-center">
-            {Object.keys(board).map((key) => {
-              return (
-                <div className="flex flex-col" key={key}>
-                  <div className="flex justify-center">
-                    <h1 className="font-bold">{key}</h1>
-                  </div>
-                  <div className="flex justify-center">
-                    <input
-                      type="color"
-                      value={board[key]}
-                      onChange={(e) => {
-                        const newBoard = { ...board } as {
-                          [key: string]: string;
-                        };
-                        newBoard[key] = e.target.value;
-                        setBoard(newBoard);
-                        localStorage.setItem("board", JSON.stringify(newBoard));
-                      }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        <div className="flex flex-row">
+          {tetrominoes.map((tetromino, i) => (
+            <div className="flex flex-col" key={i}>
+              {displayMinoBlock(tetromino)}
+            </div>
+          ))}
         </div>
       </div>
       <Footer />
