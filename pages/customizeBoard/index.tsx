@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
+import ColorWheel from "../components/colorWheel";
 
 export default function customizeBoard(): JSX.Element {
   const [board, setBoard] = useState<{ [key: string]: string }>({});
+  const [piece, setPiece] = useState<string>("boardBGColor");
+  const [renderNum, setRenderNum] = useState<number>(0);
 
   useEffect(() => {
     const storedBoard = localStorage.getItem("board");
@@ -23,7 +26,7 @@ export default function customizeBoard(): JSX.Element {
       setBoard(defaultBoard);
       localStorage.setItem("board", JSON.stringify(defaultBoard));
     }
-  }, []);
+  }, [renderNum]);
 
   const tetrominoes = [
     [
@@ -62,7 +65,7 @@ export default function customizeBoard(): JSX.Element {
 
   const returnMinoSquare = (tetromino: string[][]) => {
     const newTetromino = Array.from({ length: 4 }, () =>
-      Array.from({ length: 4 }, () => ({ value: "", isPlayed: false }))
+      Array.from({ length: 4 }, () => ({ value: "" }))
     );
     const yOffset =
       tetromino === tetrominoes[0]
@@ -77,7 +80,6 @@ export default function customizeBoard(): JSX.Element {
       row.forEach((col, j) => {
         if (col !== "") {
           newTetromino[i + yOffset][j].value = col;
-          newTetromino[i + yOffset][j].isPlayed = true;
         }
       })
     );
@@ -94,7 +96,38 @@ export default function customizeBoard(): JSX.Element {
       board.tColor,
       board.zColor,
     ];
-    return tetrominoes.indexOf(tetromino) === 0 ? board.iColor : boardColorArray[tetrominoes.indexOf(tetromino)];
+    return tetrominoes.indexOf(tetromino) === 0
+      ? board.iColor
+      : boardColorArray[tetrominoes.indexOf(tetromino)];
+  };
+
+  const handleChangeModal = (mino: string) => {
+    switch (mino) {
+      case "I":
+        setPiece("iColor");
+        break;
+      case "J":
+        setPiece("jColor");
+        break;
+      case "L":
+        setPiece("lColor");
+        break;
+      case "O":
+        setPiece("oColor");
+        break;
+      case "S":
+        setPiece("sColor");
+        break;
+      case "T":
+        setPiece("tColor");
+        break;
+      case "Z":
+        setPiece("zColor");
+        break;
+      default:
+        setPiece("boardBGColor");
+        break;
+    }
   };
 
   const displayMinoBlock = (tetromino: string[][]) => {
@@ -111,6 +144,9 @@ export default function customizeBoard(): JSX.Element {
                 style={{
                   backgroundColor: square.value ? minoColor : bgColor,
                 }}
+                onClick={() => {
+                  handleChangeModal(square.value);
+                }}
                 key={j}
               ></div>
             ))}
@@ -123,13 +159,18 @@ export default function customizeBoard(): JSX.Element {
   return (
     <div>
       <Navbar />
-      <div className="flex justify-center mt-5">
+      <div className="flex flex-col items-center mt-5">
         <div className="flex flex-row">
           {tetrominoes.map((tetromino, i) => (
             <div className="flex flex-col" key={i}>
               {displayMinoBlock(tetromino)}
             </div>
           ))}
+        </div>
+        <div className="w-20 h-20 flex flex-row justify-center mt-5">
+          <div onClick={() => setRenderNum(renderNum + 1)}>
+            <ColorWheel piece={piece} />
+          </div>
         </div>
       </div>
       <Footer />

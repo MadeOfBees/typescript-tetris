@@ -1,6 +1,10 @@
 import React from "react";
 
-export default function ColorWheel(): JSX.Element {
+export default function ColorWheel({ piece }: { piece: string }): JSX.Element {
+  let gamePiece: string = "";
+  if (piece) {
+    gamePiece = piece;
+  }
   const colors = new Set<string>();
   for (let i = 0; i <= 6; i++) {
     for (let j = 0; j <= 6; j++) {
@@ -15,6 +19,34 @@ export default function ColorWheel(): JSX.Element {
       }
     }
   }
+
+  const formatRGBtoHex = (color: string) => {
+    const rgb = color
+      .replace("rgb(", "")
+      .replace(")", "")
+      .split(",")
+      .map((x) => parseInt(x));
+    const hex = rgb
+      .map((x) => {
+        const hex = x.toString(16);
+        return hex.length === 1 ? "0" + hex : hex;
+      })
+      .join("");
+    return "#" + hex;
+  };
+
+  const submitNewColor = (color: string, piece: string) => {
+    console.log(color, piece);
+    const storedBoard = localStorage.getItem("board");
+    if (storedBoard) {
+      const board = JSON.parse(storedBoard);
+      board[piece] = formatRGBtoHex(color);
+      console.log(board);
+      localStorage.setItem("board", JSON.stringify(board));
+    } else {
+      return;
+    }
+  };
 
   const greyScale = [];
   for (let i = 0; i < 4; i++) {
@@ -42,25 +74,25 @@ export default function ColorWheel(): JSX.Element {
   };
 
   const colorsSortedByHSL = Array.from(colors)
-  .map((color) => {
-    const rgb = color
-      .replace("rgb(", "")
-      .replace(")", "")
-      .split(",")
-      .map((x) => parseInt(x));
-    const hsl = RGBToHSL(rgb[0], rgb[1], rgb[2]);
-    return { color, hsl };
-  })
-  .sort((a, b) => {
-    if (a.hsl[0] === b.hsl[0]) {
-      if (a.hsl[1] === b.hsl[1]) {
-        return a.hsl[2] - b.hsl[2];
+    .map((color) => {
+      const rgb = color
+        .replace("rgb(", "")
+        .replace(")", "")
+        .split(",")
+        .map((x) => parseInt(x));
+      const hsl = RGBToHSL(rgb[0], rgb[1], rgb[2]);
+      return { color, hsl };
+    })
+    .sort((a, b) => {
+      if (a.hsl[0] === b.hsl[0]) {
+        if (a.hsl[1] === b.hsl[1]) {
+          return a.hsl[2] - b.hsl[2];
+        }
+        return a.hsl[1] - b.hsl[1];
       }
-      return a.hsl[1] - b.hsl[1];
-    }
-    return a.hsl[0] - b.hsl[0];
-  })
-  .map((x) => x.color);
+      return a.hsl[0] - b.hsl[0];
+    })
+    .map((x) => x.color);
 
   const concatColors = colorsSortedByHSL.concat(greyScale.reverse());
 
@@ -71,11 +103,14 @@ export default function ColorWheel(): JSX.Element {
     >
       {concatColors.map((color) => (
         <div
-          className="w-10 h-10 border border-black"
+          className="w-3 h-3 border border-black"
           style={{
             backgroundColor: color,
           }}
           key={color}
+          onClick={() => {
+            submitNewColor(color, gamePiece);
+          }}
         ></div>
       ))}
     </div>
