@@ -20,27 +20,12 @@ export default function ColorWheel({ piece }: { piece: string }): JSX.Element {
     }
   }
 
-  const formatRGBtoHex = (color: string) => {
-    const rgb = color
-      .replace("rgb(", "")
-      .replace(")", "")
-      .split(",")
-      .map((x) => parseInt(x));
-    const hex = rgb
-      .map((x) => {
-        const hex = x.toString(16);
-        return hex.length === 1 ? "0" + hex : hex;
-      })
-      .join("");
-    return "#" + hex;
-  };
-
   const submitNewColor = (color: string, piece: string) => {
     console.log(color, piece);
     const storedBoard = localStorage.getItem("board");
     if (storedBoard) {
       const board = JSON.parse(storedBoard);
-      board[piece] = formatRGBtoHex(color);
+      board[piece] = (color);
       console.log(board);
       localStorage.setItem("board", JSON.stringify(board));
     } else {
