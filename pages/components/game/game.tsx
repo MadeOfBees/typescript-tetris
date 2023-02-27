@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { release } from "os";
+import React, { useState, useEffect, useRef } from "react";
 
 export default function Game(): JSX.Element {
   const tetrominoes = [
@@ -101,13 +102,34 @@ export default function Game(): JSX.Element {
   };
 
   const Dpad = () => {
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+    const handlePress = (key: string) => {
+      pulseKey(key);
+      const delay = 100;
+      timerRef.current = setTimeout(() => {
+        const interval = setInterval(() => {
+          pulseKey(key);
+        }, 75);
+        timerRef.current = interval;
+      }, delay);
+
+      const handleMouseUp = () => {
+        clearTimeout(timerRef.current as NodeJS.Timeout);
+        clearInterval(timerRef.current as NodeJS.Timeout);
+        timerRef.current = null;
+        document.removeEventListener("mouseup", handleMouseUp);
+      };
+      document.addEventListener("mouseup", handleMouseUp);
+    };
+
     return (
       <div className="justify-center flex flex-col mt-5">
         <div className="flex justify-center w-full">
           <button
             className="kbd"
             onMouseDown={() => {
-              pulseKey("ArrowUp");
+              handlePress("ArrowUp");
             }}
           >
             ▲
@@ -117,7 +139,7 @@ export default function Game(): JSX.Element {
           <button
             className="kbd"
             onMouseDown={() => {
-              pulseKey("ArrowLeft");
+              handlePress("ArrowLeft");
             }}
           >
             ◀︎
@@ -131,7 +153,7 @@ export default function Game(): JSX.Element {
           <button
             className="kbd"
             onMouseDown={() => {
-              pulseKey("ArrowRight");
+              handlePress("ArrowRight");
             }}
           >
             ▶︎
@@ -141,7 +163,7 @@ export default function Game(): JSX.Element {
           <button
             className="kbd"
             onMouseDown={() => {
-              pulseKey("ArrowDown");
+              handlePress("ArrowDown");
             }}
           >
             ▼
@@ -297,7 +319,7 @@ export default function Game(): JSX.Element {
           gameObj.currentScore
         );
       }
-    }, 10);
+    }, 15);
     updateB;
   };
 
