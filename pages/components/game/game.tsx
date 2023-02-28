@@ -55,7 +55,6 @@ export default function Game(): JSX.Element {
       Array.from({ length: 10 }, () => ({ value: "", isPlayed: false }))
     )
   );
-  let rotationNum: number = 1;
   const [displayedMino, setDisplayedMino] = useState<
     Array<Array<{ value: string; isPlayed: boolean }>>
   >(
@@ -75,13 +74,7 @@ export default function Game(): JSX.Element {
 
   const pulseKey = (key: string, isHeld: boolean = false) => {
     if (!sessionStorage.getItem("move")) {
-      const move = {
-        upHeld: false,
-        downHeld: false,
-        leftHeld: false,
-        rightHeld: false,
-      };
-      sessionStorage.setItem("move", JSON.stringify(move));
+      sessionStorage.setItem("move", JSON.stringify(defaultLSVal));
       pulseKey(key, isHeld);
     } else {
       const move = JSON.parse(sessionStorage.getItem("move") || "null");
@@ -690,7 +683,6 @@ export default function Game(): JSX.Element {
         clearedBoard.gameBoard,
         clearedBoard.gameScore
       );
-      rotationNum = 1;
       gameNextMino = await newMino();
       gameScore = clearedBoard.gameScore;
       gameBoard = gameObj.gameBoard;
