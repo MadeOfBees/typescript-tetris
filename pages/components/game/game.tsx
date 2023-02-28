@@ -122,14 +122,7 @@ export default function Game(): JSX.Element {
         timerRef.current = null;
         document.removeEventListener("mouseup", handleMouseUp);
       };
-      const handleTouchEnd = () => {
-        clearTimeout(timerRef.current as NodeJS.Timeout);
-        clearInterval(timerRef.current as NodeJS.Timeout);
-        timerRef.current = null;
-        document.removeEventListener("touchend", handleTouchEnd);
-      };
       document.addEventListener("mouseup", handleMouseUp);
-      document.addEventListener("touchend", handleTouchEnd);
     };
   
     const handleContextMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -141,9 +134,6 @@ export default function Game(): JSX.Element {
         <div className="flex justify-center w-full">
           <button
             className="kbd"
-            onTouchStart={() => {
-              handlePress("ArrowUp");
-            }}
             onMouseDown={() => {
               handlePress("ArrowUp");
             }}
@@ -155,9 +145,6 @@ export default function Game(): JSX.Element {
         <div className="flex justify-center w-full">
           <button
             className="kbd"
-            onTouchStart={() => {
-              handlePress("ArrowLeft");
-            }}
             onMouseDown={() => {
               handlePress("ArrowLeft");
             }}
@@ -173,9 +160,6 @@ export default function Game(): JSX.Element {
           </button>
           <button
             className="kbd"
-            onTouchStart={() => {
-              handlePress("ArrowRight");
-            }}
             onMouseDown={() => {
               handlePress("ArrowRight");
             }}
@@ -187,9 +171,6 @@ export default function Game(): JSX.Element {
         <div className="flex justify-center w-full">
           <button
             className="kbd"
-            onTouchStart={() => {
-              handlePress("ArrowDown");
-            }}
             onMouseDown={() => {
               handlePress("ArrowDown");
             }}
