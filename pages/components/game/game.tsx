@@ -782,7 +782,7 @@ export default function Game(): JSX.Element {
   };
 
   useEffect(() => {
-      setColors().then(startGame);
+    setColors().then(startGame);
   }, []);
 
   useEffect(() => {
@@ -842,35 +842,33 @@ export default function Game(): JSX.Element {
           </div>
         </div>
       </div>
-      {displayPaused||displayGameOver ? (
+      {displayPaused || displayGameOver ? (
         <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center">
-        {displayPaused ? (
           <div className="bg-gray-900 bg-opacity-50 w-full h-full flex justify-center items-center">
-            <div className="bg-gray-900 bg-opacity-50 w-1/2 h-1/2 flex flex-col justify-center items-center">
-              <h1 className="text-4xl text-white">Paused</h1>
-            </div>
+            {displayPaused ? (
+              <div className="bg-gray-900 bg-opacity-50 w-1/2 h-1/2 flex flex-col justify-center items-center">
+                <h1 className="text-4xl text-white">Paused</h1>
+              </div>
+            ) : null}
+            {displayGameOver ? (
+              <div className="bg-gray-900 bg-opacity-50 w-1/2 h-1/2 flex flex-col justify-center items-center">
+                <h1 className="text-4xl text-white">Game Over</h1>
+                <button
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={() => {
+                    setDisplayGameOver(false);
+                    gameOver = false;
+                    setColors().then(startGame);
+                  }}
+                >
+                  Play Again
+                </button>
+              </div>
+            ) : null}
           </div>
-        ) : null}
-        {displayGameOver ? (
-          <div className="bg-gray-900 bg-opacity-50 w-full h-full flex justify-center items-center">
-            <div className="bg-gray-900 bg-opacity-50 w-1/2 h-1/2 flex flex-col justify-center items-center">
-              <h1 className="text-4xl text-white">Game Over</h1>
-              <button
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                onClick={() => {
-                  gameOver = false;
-                  setDisplayGameOver(false);
-                  setColors().then(startGame);
-                }}
-              >
-                Play Again
-              </button>
-            </div>
-          </div>
-        ) : null}
-      </div>
+        </div>
       ) : null}
       <Dpad />
     </div>
   );
-};
+}
