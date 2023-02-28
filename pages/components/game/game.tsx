@@ -105,34 +105,49 @@ export default function Game(): JSX.Element {
 
   const Dpad = () => {
     const timerRef = useRef<NodeJS.Timeout | null>(null);
-
+  
     const handlePress = (key: string) => {
       pulseKey(key);
-      const delay = 100;
+      const delay = 150;
       timerRef.current = setTimeout(() => {
         const interval = setInterval(() => {
           pulseKey(key);
-        }, 75);
+        }, 40);
         timerRef.current = interval;
       }, delay);
-
+  
       const handleMouseUp = () => {
         clearTimeout(timerRef.current as NodeJS.Timeout);
         clearInterval(timerRef.current as NodeJS.Timeout);
         timerRef.current = null;
         document.removeEventListener("mouseup", handleMouseUp);
       };
+      const handleTouchEnd = () => {
+        clearTimeout(timerRef.current as NodeJS.Timeout);
+        clearInterval(timerRef.current as NodeJS.Timeout);
+        timerRef.current = null;
+        document.removeEventListener("touchend", handleTouchEnd);
+      };
       document.addEventListener("mouseup", handleMouseUp);
+      document.addEventListener("touchend", handleTouchEnd);
     };
-
+  
+    const handleContextMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+    };
+  
     return (
       <div className="justify-center flex flex-col mt-5">
         <div className="flex justify-center w-full">
           <button
             className="kbd"
+            onTouchStart={() => {
+              handlePress("ArrowUp");
+            }}
             onMouseDown={() => {
               handlePress("ArrowUp");
             }}
+            onContextMenu={handleContextMenu}
           >
             ▲
           </button>
@@ -140,9 +155,13 @@ export default function Game(): JSX.Element {
         <div className="flex justify-center w-full">
           <button
             className="kbd"
+            onTouchStart={() => {
+              handlePress("ArrowLeft");
+            }}
             onMouseDown={() => {
               handlePress("ArrowLeft");
             }}
+            onContextMenu={handleContextMenu}
           >
             ◀︎
           </button>
@@ -154,9 +173,13 @@ export default function Game(): JSX.Element {
           </button>
           <button
             className="kbd"
+            onTouchStart={() => {
+              handlePress("ArrowRight");
+            }}
             onMouseDown={() => {
               handlePress("ArrowRight");
             }}
+            onContextMenu={handleContextMenu}
           >
             ▶︎
           </button>
@@ -164,9 +187,13 @@ export default function Game(): JSX.Element {
         <div className="flex justify-center w-full">
           <button
             className="kbd"
+            onTouchStart={() => {
+              handlePress("ArrowDown");
+            }}
             onMouseDown={() => {
               handlePress("ArrowDown");
             }}
+            onContextMenu={handleContextMenu}
           >
             ▼
           </button>
@@ -174,6 +201,8 @@ export default function Game(): JSX.Element {
       </div>
     );
   };
+  
+  
 
   const displayNextTetramino = (tetromino: string[][]) => {
     let newTetromino: Array<Array<{ value: string; isPlayed: boolean }>> = [];
@@ -306,7 +335,7 @@ export default function Game(): JSX.Element {
           gameObj.currentScore
         );
       }
-    }, 15);
+    }, 5);
     updateB;
   };
 
