@@ -125,7 +125,7 @@ export default function Game(): JSX.Element {
         }, 40);
         timerRef.current = interval;
       }, delay);
-  
+      
       const handleRelease = () => {
         clearTimeout(timerRef.current as NodeJS.Timeout);
         clearInterval(timerRef.current as NodeJS.Timeout);
@@ -133,7 +133,6 @@ export default function Game(): JSX.Element {
         pulseKey(key, false,);
         document.removeEventListener("mouseup", handleRelease);
       };
-  
       document.addEventListener("mouseup", handleRelease);
     };
     
