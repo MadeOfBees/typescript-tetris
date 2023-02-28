@@ -71,6 +71,17 @@ export default function Game(): JSX.Element {
     downHeld: false,
     upHeld: false,
   };
+  useEffect(() => {
+    const handleVisibilityChanges = () => {
+      if (document.visibilityState === "hidden" && !paused) {
+        window.location.reload();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChanges);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChanges);
+    };
+  }, []);
 
   const pulseKey = (key: string, isHeld: boolean = false) => {
     if (!sessionStorage.getItem("move")) {
@@ -103,14 +114,14 @@ export default function Game(): JSX.Element {
   };
 
   const Dpad = () => {
-    const timerRef = useRef<NodeJS.Timeout | null>(null);;
-
-    const handlePress = (key: string) => {
-      pulseKey(key, true);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+  
+    const handlePress = (key: string, event: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
+      pulseKey(key, true)
       const delay = 150;
       timerRef.current = setTimeout(() => {
         const interval = setInterval(() => {
-          pulseKey(key, true);
+          pulseKey(key, true)
         }, 40);
         timerRef.current = interval;
       }, delay);
@@ -119,14 +130,14 @@ export default function Game(): JSX.Element {
         clearTimeout(timerRef.current as NodeJS.Timeout);
         clearInterval(timerRef.current as NodeJS.Timeout);
         timerRef.current = null;
-        pulseKey(key, false);
+        pulseKey(key, false,);
         document.removeEventListener("mouseup", handleRelease);
-        document.removeEventListener("touchend", handleRelease);
       };
+  
       document.addEventListener("mouseup", handleRelease);
-      document.addEventListener("touchend", handleRelease);
     };
-
+    
+    
     const createButton = (label: string, key: string) => {
       return (
         <button
@@ -134,10 +145,10 @@ export default function Game(): JSX.Element {
           className="kbd"
           onTouchStart={(e) => {
             e.preventDefault();
-            handlePress(key);
+            pulseKey(key, true);
           }}
-          onMouseDown={() => {
-            handlePress(key);
+          onMouseDown={(e) => {
+            handlePress(key, e);
           }}
           onContextMenu={(e) => {
             e.preventDefault();
@@ -147,24 +158,22 @@ export default function Game(): JSX.Element {
         </button>
       );
     };
-
+    
     return (
       <div className="justify-center flex flex-col mt-5">
         <div className="flex justify-center w-full">
-          {createButton("▲", "ArrowUp")}
+          {createButton("△", "ArrowUp")}
         </div>
         <div className="flex justify-center w-full">
-          {createButton("◀︎", "ArrowLeft")}
+          {createButton("◁", "ArrowLeft")}
           <button
             className="kbd"
             style={{ width: "2.25rem", height: "2.25rem" }}
-          >
-            ⚪
-          </button>
-          {createButton("▶︎", "ArrowRight")}
+          />
+          {createButton("▷", "ArrowRight")}
         </div>
         <div className="flex justify-center w-full">
-          {createButton("▼", "ArrowDown")}
+          {createButton("▽", "ArrowDown")}
         </div>
       </div>
     );
