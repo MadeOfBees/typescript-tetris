@@ -98,27 +98,40 @@ export default function Game(): JSX.Element {
         case "ArrowRight":
           move.rightHeld = isHeld;
           break;
+        default:
+          move.upHeld = false;
+          move.downHeld = false;
+          move.leftHeld = false;
+          move.rightHeld = false;
+          break;
       }
       sessionStorage.setItem("move", JSON.stringify(move));
     }
   };
 
   const Dpad = () => {
-    const intervalRef = useRef<NodeJS.Timeout | null>(null);
-    const delay = 150;
+    const timerRef = useRef<NodeJS.Timeout | null>(null);;
 
     const handlePress = (key: string) => {
       pulseKey(key, true);
-      intervalRef.current = setInterval(() => {
-        pulseKey(key, true);
+      const delay = 150;
+      timerRef.current = setTimeout(() => {
+        const interval = setInterval(() => {
+          pulseKey(key, true);
+        }, 40);
+        timerRef.current = interval;
       }, delay);
-    };
-
-    const handleRelease = (key: string) => {
-      pulseKey(key, false);
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+  
+      const handleRelease = () => {
+        clearTimeout(timerRef.current as NodeJS.Timeout);
+        clearInterval(timerRef.current as NodeJS.Timeout);
+        timerRef.current = null;
+        pulseKey(key, false);
+        document.removeEventListener("mouseup", handleRelease);
+        document.removeEventListener("touchend", handleRelease);
+      };
+      document.addEventListener("mouseup", handleRelease);
+      document.addEventListener("touchend", handleRelease);
     };
 
     const createButton = (label: string, key: string) => {
@@ -132,12 +145,6 @@ export default function Game(): JSX.Element {
           }}
           onMouseDown={() => {
             handlePress(key);
-          }}
-          onTouchEnd={() => {
-            handleRelease(key);
-          }}
-          onMouseUp={() => {
-            handleRelease(key);
           }}
           onContextMenu={(e) => {
             e.preventDefault();
@@ -624,7 +631,7 @@ export default function Game(): JSX.Element {
         break;
       }
     }
-    sessionStorage.removeItem("move");
+    pulseKey("remove", false);
     let offset = 3;
     if (gameNextMino[0][1] === "O" || gameNextMino[1][1] === "J") {
       offset = 4;
