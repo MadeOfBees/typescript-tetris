@@ -1,4 +1,3 @@
-import { release } from "os";
 import React, { useState, useEffect, useRef } from "react";
 
 export default function Game(): JSX.Element {
@@ -45,6 +44,10 @@ export default function Game(): JSX.Element {
   const [zColor, setZColor] = useState<string>("#808080");
   const [boardBGColor, setBoardBGColor] = useState<string>("#ffffff");
   let clearedLines: number = 0;
+  let paused: boolean = false;
+  const [displayPaused, setDisplayPaused] = useState<boolean>(false);
+  let gameOver: boolean = false;
+  const [displayGameOver, setDisplayGameOver] = useState<boolean>(false);
   const [board, setBoard] = useState<
     Array<Array<{ value: string; isPlayed: boolean }>>
   >(
@@ -62,7 +65,6 @@ export default function Game(): JSX.Element {
   );
   let fallCount = 0;
   const [score, setScore] = useState<number>(0);
-  const [gameOver, setGameOver] = useState<boolean>(false);
   const gameSpeed: number = 50;
   const defaultLSVal = {
     leftHeld: false,
@@ -218,21 +220,6 @@ export default function Game(): JSX.Element {
     return newUserID;
   };
 
-  const startNewGame = () => {
-    setBoard(
-      Array.from({ length: 20 }, () =>
-        Array.from({ length: 10 }, () => ({ value: "", isPlayed: false }))
-      )
-    );
-    setDisplayedMino(
-      Array.from({ length: 4 }, () =>
-        Array.from({ length: 4 }, () => ({ value: "", isPlayed: false }))
-      )
-    );
-    setScore(0);
-    setGameOver(false);
-  };
-
   const setColors = async () => {
     const boardData = localStorage.getItem("board");
     if (boardData) {
@@ -307,7 +294,7 @@ export default function Game(): JSX.Element {
       currentScore: 0,
     };
     const updateB = setInterval(async () => {
-      if (!gameOver) {
+      if (!gameOver && !paused) {
         gameObj = await gameTick(
           gameObj.gameNextMino,
           gameObj.gameBoard,
@@ -340,8 +327,10 @@ export default function Game(): JSX.Element {
       if (emptyRow) emptyRows++;
     }
     if (emptyRows === 20) {
-      gameBoard = await spawnMino(gameNextMino, gameBoard);
+      const gameObj = await spawnMino(gameNextMino, gameBoard, currentScore);
       gameNextMino = await newMino();
+      gameBoard = gameObj.gameBoard;
+      currentScore = gameObj.gameScore;
     } else {
       if (fallCount === 0) {
         const newGameObj = await minoFall(
@@ -602,7 +591,8 @@ export default function Game(): JSX.Element {
 
   const spawnMino = async (
     gameNextMino: string[][],
-    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>
+    gameBoard: Array<Array<{ value: string; isPlayed: boolean }>>,
+    gameScore: number
   ) => {
     const newGameBoard = gameBoard.map((row) =>
       row.map((cell) => ({ ...cell, isPlayed: false }))
@@ -617,7 +607,28 @@ export default function Game(): JSX.Element {
           }
         }
       }
-      if (!canSpawn) break;
+      if (!canSpawn) {
+        gameOver = true;
+        setDisplayGameOver(true);
+        const response = await fetch(`/api/scores/new`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userID: await idTheUser(),
+            score: gameScore,
+          }),
+        });
+        // use a try catch block to handle errors
+        try {
+          const data = await response.json();
+          console.log(data);
+        } catch (error) {
+          console.log(error);
+        }
+        break;
+      }
     }
     let offset = 3;
     if (gameNextMino[0][1] === "O" || gameNextMino[1][1] === "J") {
@@ -633,7 +644,11 @@ export default function Game(): JSX.Element {
         }
       }
     }
-    return newGameBoard;
+    const gameObj = {
+      gameBoard: newGameBoard,
+      gameScore: gameScore,
+    };
+    return gameObj;
   };
 
   const minoFall = async (
@@ -668,14 +683,15 @@ export default function Game(): JSX.Element {
         }
       }
       const clearedBoard = await checkForLines(gameBoard, gameScore);
-      const newGameBoard = await spawnMino(
+      const gameObj = await spawnMino(
         gameNextMino,
-        clearedBoard.gameBoard
+        clearedBoard.gameBoard,
+        clearedBoard.gameScore
       );
       rotationNum = 1;
       gameNextMino = await newMino();
       gameScore = clearedBoard.gameScore;
-      gameBoard = newGameBoard;
+      gameBoard = gameObj.gameBoard;
     } else {
       for (let i = gameBoard.length - 1; i >= 0; i--) {
         for (let j = 0; j < gameBoard[i].length; j++) {
@@ -766,8 +782,8 @@ export default function Game(): JSX.Element {
   };
 
   useEffect(() => {
-    setColors().then(startGame);
-  }, [gameOver]);
+      setColors().then(startGame);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -783,12 +799,20 @@ export default function Game(): JSX.Element {
       if (e.key === "ArrowUp" || e.key === "w" || e.key === "i") {
         pulseKey("ArrowUp");
       }
+      if (e.key === "Escape") {
+        pauseGame();
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
+
+  const pauseGame = () => {
+    paused = !paused;
+    setDisplayPaused(paused);
+  };
 
   return (
     <div className="flex flex-col mt-5">
@@ -818,7 +842,35 @@ export default function Game(): JSX.Element {
           </div>
         </div>
       </div>
+      {displayPaused||displayGameOver ? (
+        <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center">
+        {displayPaused ? (
+          <div className="bg-gray-900 bg-opacity-50 w-full h-full flex justify-center items-center">
+            <div className="bg-gray-900 bg-opacity-50 w-1/2 h-1/2 flex flex-col justify-center items-center">
+              <h1 className="text-4xl text-white">Paused</h1>
+            </div>
+          </div>
+        ) : null}
+        {displayGameOver ? (
+          <div className="bg-gray-900 bg-opacity-50 w-full h-full flex justify-center items-center">
+            <div className="bg-gray-900 bg-opacity-50 w-1/2 h-1/2 flex flex-col justify-center items-center">
+              <h1 className="text-4xl text-white">Game Over</h1>
+              <button
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                onClick={() => {
+                  gameOver = false;
+                  setDisplayGameOver(false);
+                  setColors().then(startGame);
+                }}
+              >
+                Play Again
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </div>
+      ) : null}
       <Dpad />
     </div>
   );
-}
+};
