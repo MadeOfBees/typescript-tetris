@@ -55,7 +55,6 @@ export default function Game(): JSX.Element {
       Array.from({ length: 10 }, () => ({ value: "", isPlayed: false }))
     )
   );
-  let rotationNum: number = 1;
   const [displayedMino, setDisplayedMino] = useState<
     Array<Array<{ value: string; isPlayed: boolean }>>
   >(
@@ -72,31 +71,42 @@ export default function Game(): JSX.Element {
     downHeld: false,
     upHeld: false,
   };
+  useEffect(() => {
+    const handleVisibilityChanges = () => {
+      if (document.visibilityState === "hidden" && !paused) {
+        window.location.reload();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChanges);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChanges);
+    };
+  }, []);
 
-  const pulseKey = (key: string) => {
+  const pulseKey = (key: string, isHeld: boolean = false) => {
     if (!sessionStorage.getItem("move")) {
-      const move = {
-        upHeld: false,
-        downHeld: false,
-        leftHeld: false,
-        rightHeld: false,
-      };
-      sessionStorage.setItem("move", JSON.stringify(move));
-      pulseKey(key);
+      sessionStorage.setItem("move", JSON.stringify(defaultLSVal));
+      pulseKey(key, isHeld);
     } else {
       const move = JSON.parse(sessionStorage.getItem("move") || "null");
       switch (key) {
         case "ArrowUp":
-          move.upHeld = true;
+          move.upHeld = isHeld;
           break;
         case "ArrowDown":
-          move.downHeld = true;
+          move.downHeld = isHeld;
           break;
         case "ArrowLeft":
-          move.leftHeld = true;
+          move.leftHeld = isHeld;
           break;
         case "ArrowRight":
-          move.rightHeld = true;
+          move.rightHeld = isHeld;
+          break;
+        default:
+          move.upHeld = false;
+          move.downHeld = false;
+          move.leftHeld = false;
+          move.rightHeld = false;
           break;
       }
       sessionStorage.setItem("move", JSON.stringify(move));
@@ -106,84 +116,67 @@ export default function Game(): JSX.Element {
   const Dpad = () => {
     const timerRef = useRef<NodeJS.Timeout | null>(null);
   
-    const handlePress = (key: string) => {
-      pulseKey(key);
+    const handlePress = (key: string, event: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
+      pulseKey(key, true)
       const delay = 150;
       timerRef.current = setTimeout(() => {
         const interval = setInterval(() => {
-          pulseKey(key);
+          pulseKey(key, true)
         }, 40);
         timerRef.current = interval;
       }, delay);
-  
-      const handleMouseUp = () => {
+      
+      const handleRelease = () => {
         clearTimeout(timerRef.current as NodeJS.Timeout);
         clearInterval(timerRef.current as NodeJS.Timeout);
         timerRef.current = null;
-        document.removeEventListener("mouseup", handleMouseUp);
+        pulseKey(key, false,);
+        document.removeEventListener("mouseup", handleRelease);
       };
-      document.addEventListener("mouseup", handleMouseUp);
+      document.addEventListener("mouseup", handleRelease);
     };
-  
-    const handleContextMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
-      event.preventDefault();
+    
+    
+    const createButton = (label: string, key: string) => {
+      return (
+        <button
+          key={key}
+          className="kbd"
+          onTouchStart={(e) => {
+            e.preventDefault();
+            pulseKey(key, true);
+          }}
+          onMouseDown={(e) => {
+            handlePress(key, e);
+          }}
+          onContextMenu={(e) => {
+            e.preventDefault();
+          }}
+        >
+          {label}
+        </button>
+      );
     };
-  
+    
     return (
       <div className="justify-center flex flex-col mt-5">
         <div className="flex justify-center w-full">
-          <button
-            className="kbd"
-            onMouseDown={() => {
-              handlePress("ArrowUp");
-            }}
-            onContextMenu={handleContextMenu}
-          >
-            ▲
-          </button>
+          {createButton("△", "ArrowUp")}
         </div>
         <div className="flex justify-center w-full">
-          <button
-            className="kbd"
-            onMouseDown={() => {
-              handlePress("ArrowLeft");
-            }}
-            onContextMenu={handleContextMenu}
-          >
-            ◀︎
-          </button>
+          {createButton("◁", "ArrowLeft")}
           <button
             className="kbd"
             style={{ width: "2.25rem", height: "2.25rem" }}
-          >
-            ⚪
-          </button>
-          <button
-            className="kbd"
-            onMouseDown={() => {
-              handlePress("ArrowRight");
-            }}
-            onContextMenu={handleContextMenu}
-          >
-            ▶︎
-          </button>
+          />
+          {createButton("▷", "ArrowRight")}
         </div>
         <div className="flex justify-center w-full">
-          <button
-            className="kbd"
-            onMouseDown={() => {
-              handlePress("ArrowDown");
-            }}
-            onContextMenu={handleContextMenu}
-          >
-            ▼
-          </button>
+          {createButton("▽", "ArrowDown")}
         </div>
       </div>
     );
   };
-  
-  
 
   const displayNextTetramino = (tetromino: string[][]) => {
     let newTetromino: Array<Array<{ value: string; isPlayed: boolean }>> = [];
@@ -630,7 +623,6 @@ export default function Game(): JSX.Element {
             score: gameScore,
           }),
         });
-        // use a try catch block to handle errors
         try {
           const data = await response.json();
           console.log(data);
@@ -640,6 +632,7 @@ export default function Game(): JSX.Element {
         break;
       }
     }
+    pulseKey("remove", false);
     let offset = 3;
     if (gameNextMino[0][1] === "O" || gameNextMino[1][1] === "J") {
       offset = 4;
@@ -698,7 +691,6 @@ export default function Game(): JSX.Element {
         clearedBoard.gameBoard,
         clearedBoard.gameScore
       );
-      rotationNum = 1;
       gameNextMino = await newMino();
       gameScore = clearedBoard.gameScore;
       gameBoard = gameObj.gameBoard;
@@ -798,16 +790,16 @@ export default function Game(): JSX.Element {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft" || e.key === "a" || e.key === "j") {
-        pulseKey("ArrowLeft");
+        pulseKey("ArrowLeft", true);
       }
       if (e.key === "ArrowRight" || e.key === "d" || e.key === "l") {
-        pulseKey("ArrowRight");
+        pulseKey("ArrowRight", true);
       }
       if (e.key === "ArrowDown" || e.key === "s" || e.key === "k") {
-        pulseKey("ArrowDown");
+        pulseKey("ArrowDown", true);
       }
       if (e.key === "ArrowUp" || e.key === "w" || e.key === "i") {
-        pulseKey("ArrowUp");
+        pulseKey("ArrowUp", true);
       }
       if (e.key === "Escape") {
         pauseGame();
