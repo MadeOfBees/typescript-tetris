@@ -48,7 +48,8 @@ export async function allScores(req: Request, res: Response): Promise<void> {
 export async function topTenScores(req: Request, res: Response): Promise<void> {
   try {
     const db = await connectionJS();
-    const scores: IScores[] = await Scores.find().sort({ score: 1 }).limit(10);
+    // highest 10 scores
+    const scores: IScores[] = await Scores.find().sort({score: -1}).limit(10);
     res
       .status(200)
       .json({ message: "Top ten scores retrieved successfully", scores });
@@ -72,7 +73,7 @@ export async function todaysTopTenScores(
     const scores: IScores[] = await Scores.find({
       timestamp: { $gte: estTime },
     })
-      .sort({ score: 1 })
+      .sort({ score: -1 })
       .limit(10);
     res
       .status(200)

@@ -116,7 +116,7 @@ export default function Game(): JSX.Element {
   const Dpad = () => {
     const timerRef = useRef<NodeJS.Timeout | null>(null);
   
-    const handlePress = (key: string, event: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
+    const handlePress = (key: string ) => {
       pulseKey(key, true)
       const delay = 150;
       timerRef.current = setTimeout(() => {
@@ -147,7 +147,7 @@ export default function Game(): JSX.Element {
             pulseKey(key, true);
           }}
           onMouseDown={(e) => {
-            handlePress(key, e);
+            handlePress(key);
           }}
           onContextMenu={(e) => {
             e.preventDefault();
