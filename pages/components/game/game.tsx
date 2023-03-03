@@ -55,6 +55,7 @@ export default function Game(): JSX.Element {
       Array.from({ length: 10 }, () => ({ value: "", isPlayed: false }))
     )
   );
+  let speedDecrease: boolean = false;
   const [displayedMino, setDisplayedMino] = useState<
     Array<Array<{ value: string; isPlayed: boolean }>>
   >(
@@ -64,7 +65,7 @@ export default function Game(): JSX.Element {
   );
   let fallCount = 0;
   const [score, setScore] = useState<number>(0);
-  const gameSpeed: number = 50;
+  let gameSpeed: number = 50;
   const defaultLSVal = {
     leftHeld: false,
     rightHeld: false,
@@ -357,6 +358,12 @@ export default function Game(): JSX.Element {
         currentScore = newGameObj.currentScore;
         if (fallCount === gameSpeed) fallCount = 0;
       }
+    }
+
+    if (clearedLines % 10 === 0 && clearedLines !== 0 && speedDecrease === true) {
+      gameSpeed--;
+      speedDecrease = false;
+      console.log(gameSpeed);
     }
     return {
       gameNextMino: gameNextMino,
@@ -752,18 +759,22 @@ export default function Game(): JSX.Element {
         case 1:
           newScore += 100;
           clearedLines++;
+          speedDecrease = true;
           break;
         case 2:
           newScore += 300;
           clearedLines += 2;
+          speedDecrease = true;
           break;
         case 3:
           newScore += 500;
           clearedLines += 3;
+          speedDecrease = true;
           break;
         case 4:
           newScore += 800;
           clearedLines += 4;
+          speedDecrease = true;
           break;
         default:
           break;
@@ -782,6 +793,7 @@ export default function Game(): JSX.Element {
     };
     return gameObj;
   };
+  
 
   useEffect(() => {
     setColors().then(startGame);

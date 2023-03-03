@@ -48,7 +48,6 @@ export async function allScores(req: Request, res: Response): Promise<void> {
 export async function topTenScores(req: Request, res: Response): Promise<void> {
   try {
     const db = await connectionJS();
-    // highest 10 scores
     const scores: IScores[] = await Scores.find().sort({score: -1}).limit(10);
     res
       .status(200)
