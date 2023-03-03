@@ -160,14 +160,16 @@ export default function customizeBoard(): JSX.Element {
     <div>
       <Navbar />
       <div className="flex flex-col items-center mt-5">
-        <div className="flex flex-row">
-          {tetrominoes.map((tetromino, i) => (
-            <div className="flex flex-col" key={i}>
-              {displayMinoBlock(tetromino)}
-            </div>
-          ))}
+        <div className="flex flex-row justify-center">
+          <div className="flex flex-row">
+            {tetrominoes.map((tetromino, i) => (
+              <div className="flex flex-col" key={i}>
+                {displayMinoBlock(tetromino)}
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="w-20 h-20 flex flex-row justify-center mt-5">
+        <div className="flex flex-row justify-center mt-5">
           <div onClick={() => setRenderNum(renderNum + 1)}>
             <ColorWheel piece={piece} />
           </div>
