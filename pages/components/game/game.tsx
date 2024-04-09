@@ -72,6 +72,9 @@ export default function Game(): JSX.Element {
     downHeld: false,
     upHeld: false,
   };
+  // const swipeDelay incriments 4 times to allow for a swipe to be registered only once instead of multiple times
+  let swipeDelay = 0;
+
   useEffect(() => {
     const handleVisibilityChanges = () => {
       if (document.visibilityState === "hidden" && !paused) {
@@ -116,29 +119,28 @@ export default function Game(): JSX.Element {
 
   const Dpad = () => {
     const timerRef = useRef<NodeJS.Timeout | null>(null);
-  
-    const handlePress = (key: string ) => {
-      pulseKey(key, true)
+
+    const handlePress = (key: string) => {
+      pulseKey(key, true);
       const delay = 150;
       timerRef.current = setTimeout(() => {
         const interval = setInterval(() => {
-          pulseKey(key, true)
+          pulseKey(key, true);
         }, 40);
         timerRef.current = interval;
       }, delay);
-      
+
       const handleRelease = () => {
         clearTimeout(timerRef.current as NodeJS.Timeout);
         clearInterval(timerRef.current as NodeJS.Timeout);
         timerRef.current = null;
-        pulseKey(key, false,);
+        pulseKey(key, false);
         document.removeEventListener("mouseup", handleRelease);
       };
       document.addEventListener("mouseup", handleRelease);
     };
-    
-    
-    const createButton = (label: string, key: string) => {
+
+    const drawDirectionalButton = (label: string, key: string) => {
       return (
         <button
           key={key}
@@ -158,22 +160,22 @@ export default function Game(): JSX.Element {
         </button>
       );
     };
-    
+
     return (
       <div className="justify-center flex flex-col mt-5">
         <div className="flex justify-center w-full">
-          {createButton("△", "ArrowUp")}
+          {drawDirectionalButton("△", "ArrowUp")}
         </div>
         <div className="flex justify-center w-full">
-          {createButton("◁", "ArrowLeft")}
+          {drawDirectionalButton("◁", "ArrowLeft")}
           <button
             className="kbd"
             style={{ width: "2.25rem", height: "2.25rem" }}
           />
-          {createButton("▷", "ArrowRight")}
+          {drawDirectionalButton("▷", "ArrowRight")}
         </div>
         <div className="flex justify-center w-full">
-          {createButton("▽", "ArrowDown")}
+          {drawDirectionalButton("▽", "ArrowDown")}
         </div>
       </div>
     );
@@ -360,7 +362,11 @@ export default function Game(): JSX.Element {
       }
     }
 
-    if (clearedLines % 10 === 0 && clearedLines !== 0 && speedDecrease === true) {
+    if (
+      clearedLines % 10 === 0 &&
+      clearedLines !== 0 &&
+      speedDecrease === true
+    ) {
       gameSpeed--;
       speedDecrease = false;
       console.log(gameSpeed);
@@ -793,12 +799,12 @@ export default function Game(): JSX.Element {
     };
     return gameObj;
   };
-  
 
   useEffect(() => {
     setColors().then(startGame);
   }, []);
 
+  // useEffect to handle directional keyboard inputs
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft" || e.key === "a" || e.key === "j") {
@@ -821,6 +827,50 @@ export default function Game(): JSX.Element {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
+  }, []);
+
+  // useEffect event for swiping on mobile, same as above but for touch events, each swipe is a pulseKey for the direction swiped up down left or right
+  useEffect(() => {
+    const handleTouchStart = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      const x = touch.clientX;
+      const y = touch.clientY;
+      sessionStorage.setItem("touchStart", JSON.stringify({ x, y }));
+    };
+    const handleTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      const x = touch.clientX;
+      const y = touch.clientY;
+      const touchStart = JSON.parse(
+        sessionStorage.getItem("touchStart") || JSON.stringify({ x, y })
+      );
+      const xDiff = x - touchStart.x;
+      const yDiff = y - touchStart.y;
+      if (swipeDelay < 12) {
+        swipeDelay++;
+        return;
+      }
+      if (Math.abs(xDiff) > Math.abs(yDiff)) {
+        if (xDiff > 0) {
+          pulseKey("ArrowRight", true);
+        } else {
+          pulseKey("ArrowLeft", true);
+        }
+      } else {
+        if (yDiff > 0) {
+          pulseKey("ArrowDown", true);
+        } else {
+          pulseKey("ArrowUp", true);
+        }
+      }
+      swipeDelay = 0;
+    };
+    const handleTouchEnd = () => {
+      sessionStorage.setItem("touchStart", JSON.stringify({ x: 0, y: 0 }));
+    };
+    window.addEventListener("touchstart", handleTouchStart);
+    window.addEventListener("touchmove", handleTouchMove);
+    window.addEventListener("touchend", handleTouchEnd);
   }, []);
 
   const pauseGame = () => {
@@ -882,7 +932,9 @@ export default function Game(): JSX.Element {
           </div>
         </div>
       ) : null}
-      <Dpad />
+      <div className="hidden md:block">
+        <Dpad />
+      </div>
     </div>
   );
 }
